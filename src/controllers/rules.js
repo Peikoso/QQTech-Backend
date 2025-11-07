@@ -10,4 +10,17 @@ export const RulesController = {
         }
     },
 
+    createRule: async (req, res, next) => {
+        try {
+            const ruleData = req.body;
+            const newRule = await RuleService.createRule(ruleData);
+            res.status(201).json(newRule);
+        } catch (error) {
+            if (error.name === 'ValidationError') {
+                return res.status(error.status).json({ error: error.message });
+            }
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+
 };

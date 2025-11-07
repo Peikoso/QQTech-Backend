@@ -44,6 +44,7 @@ export class Rules {
         if (!sqlValidantion(this.sql)) {
             throw new ValidationError('SQL contains forbidden commands');
         }
+
     }
 
 }

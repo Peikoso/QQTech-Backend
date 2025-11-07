@@ -1,4 +1,4 @@
-import { ValidationError } from '../utils/errors.js';
+import { ValidationError } from '../../utils/errors.js';
 
 export class CreateRulesDto {
     constructor(rule) {
@@ -17,6 +17,12 @@ export class CreateRulesDto {
         this.postpone_date = rule.postpone_date;
         this.user_creator_id = rule.user_creator_id;
     }
+
+    validateTimeFormat(time) {
+        const regex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
+        return regex.test(time);
+    }
+
 
     validate() {
         if(typeof this.name !== 'string' || this.name.trim() === '') {
@@ -46,12 +52,12 @@ export class CreateRulesDto {
             throw new ValidationError('Timeout must be a number');
         }
 
-        if(isNaN(Date.parse(this.start_time))) {
-            throw new ValidationError('Start time must be a Date');
+        if(!this.validateTimeFormat(this.start_time)) {
+            throw new ValidationError('Start time must be in the format HH:MM:SS');
         }
 
-        if(isNaN(Date.parse(this.end_time))) {
-            throw new ValidationError('End time must be a Date');
+        if(!this.validateTimeFormat(this.end_time)) {
+            throw new ValidationError('End time must be in the format HH:MM:SS');
         }
 
         if(typeof this.notification_enabled !== 'boolean') {
@@ -69,6 +75,8 @@ export class CreateRulesDto {
         if(typeof this.user_creator_id !== 'string' || this.user_creator_id.trim() === '') {
             throw new ValidationError('User creator ID must be a non-empty string');
         }
+
+        return this;
     }
 
 }

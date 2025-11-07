@@ -1,5 +1,7 @@
 import { RuleRepository } from "../repositories/rules.js";
 import { RulesResponseDto } from "../dto/rules/responseRulesDto.js";
+import { CreateRulesDto } from "../dto/rules/createRulesDto.js";
+import { Rules } from "../models/rules.js";
 import { ValidationError, NotFoundError } from "../utils/errors.js";
 
 export const RuleService = {
@@ -13,7 +15,13 @@ export const RuleService = {
     },
 
     createRule: async (ruleData) => {
-       //Logica a ser implementada
+       const dto = new CreateRulesDto(ruleData).validate();
+
+       new Rules(dto).validateBusinessRules();
+
+       const newRule = await RuleRepository.create(dto);
+
+       return new RulesResponseDto(newRule);
     },
 
     updateRule: async (id, ruleData) => {

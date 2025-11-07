@@ -15,7 +15,7 @@ app.get('/', async(req, res) => {
     res.json('Bem Vindo ao QQMonitor');
 });
 
-app.use('/api', routes);
+app.use('/api/v1', routes);
 
 // Tratamento de erros não capturados
 process.on("unhandledRejection", (reason, promise) => {

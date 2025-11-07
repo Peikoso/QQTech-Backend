@@ -1,9 +1,17 @@
-require("dotenv").config(); // carrega .env da raiz por padrão
+import dotenv from 'dotenv';
+import pkg from 'pg';
+import process from 'process';
 
-const { Pool } = require('pg');
-const process = require('process');
+dotenv.config();
+
+const { Pool, types } = pkg;
 
 const DATABASE_URL = process.env.DATABASE_URL;
+
+// bigint (int8)
+types.setTypeParser(20, (val) => parseInt(val, 10));
+// numeric / decimal
+types.setTypeParser(1700, (val) => parseFloat(val));
 
 
 if(!DATABASE_URL){
@@ -17,3 +25,5 @@ const pool = new Pool({
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
 });
+
+export { pool };

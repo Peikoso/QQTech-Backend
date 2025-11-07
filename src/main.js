@@ -1,18 +1,21 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+import process from 'process';
+import routes from './routers/index.js';
 
-const express = require('express');
-const cors = require('cors');
-const process = require('process')
-
+dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8000;
 
 app.get('/', async(req, res) => {
     res.json('Bem Vindo ao QQMonitor');
 });
+
+app.use('/api', routes);
 
 // Tratamento de erros não capturados
 process.on("unhandledRejection", (reason, promise) => {

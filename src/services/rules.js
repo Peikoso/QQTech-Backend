@@ -28,7 +28,7 @@ export const RuleService = {
     createRule: async (ruleData) => {
        const dto = new CreateRulesDto(ruleData).validate();
 
-       new Rules(dto).validateBusinessRules();
+       new Rules(dto).validateBusinessLogic();
 
        const newRule = await RuleRepository.create(dto);
 

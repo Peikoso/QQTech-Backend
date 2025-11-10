@@ -12,8 +12,8 @@ export class Users {
         this.profile = user.profile;
         this.roles = user.roles;
         this.pending = user.pending;
-        this.created_at = user.created_at;
-        this.updated_at = user.updated_at;
+        this.createdAt = user.createdAt;
+        this.updatedAt = user.updatedAt;
         this.push_enabled = user.push_enabled;
         this.email_enabled = user.email_enabled;
         this.comuniq_enabled = user.comuniq_enabled;
@@ -21,7 +21,7 @@ export class Users {
     }
 
 
-    validateBusinessRules() {
+    validateBusinessLogic() {
         const CELULAR_REGEX = /^(?:\+55\s?)?(?:\(?\d{2}\)?\s?)?(?:9\d{4}[-]?\d{4})$/;
         const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const NAME_REGEX = /^[A-Za-zÀ-ÿ]+(?:\s[A-Za-zÀ-ÿ]+)*$/;

@@ -4,8 +4,8 @@ export class ResponseRolesDto {
         this.name = role.name;
         this.color = role.color;
         this.description = role.description;
-        this.created_at = role.created_at;
-        this.updated_at = role.updated_at;
+        this.createdAt = role.createdAt;
+        this.updatedAt = role.updatedAt;
     }
 
     static fromArray(rolesArray) {

@@ -28,7 +28,7 @@ export const UserService = {
     createUser: async (userData) => {
         const dto = new CreateUsersDto(userData).validate();
 
-        new Users(dto).validateBusinessRules();
+        new Users(dto).validateBusinessLogic();
 
         const newUser = await UserRepository.create(dto);
 

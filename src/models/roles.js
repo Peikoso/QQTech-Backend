@@ -6,11 +6,11 @@ export class Roles {
         this.name = role.name;
         this.color = role.color;
         this.description = role.description;
-        this.created_at = role.created_at;
-        this.updated_at = role.updated_at;
+        this.createdAt = role.createdAt;
+        this.updatedAt = role.updatedAt;
     }
 
-    validateBusinessRules(){
+    validateBusinessLogic(){
         const COLOR_REGEX = /^#([0-9A-F]{3}){1,2}$/i;
 
         if(this.name.length > 20){

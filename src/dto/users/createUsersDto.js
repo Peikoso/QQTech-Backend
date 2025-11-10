@@ -8,8 +8,8 @@ export class CreateUsersDto {
         this.profile = user.profile ?? 'viewer';
         this.roles = user.roles ?? [];
         this.pending = user.pending ?? true;
-        this.created_at = user.created_at;
-        this.updated_at = user.updated_at;
+        this.createdAt = user.createdAt;
+        this.updatedAt = user.updatedAt;
     }
 
     validate() {

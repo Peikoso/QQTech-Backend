@@ -9,21 +9,21 @@ export class Rules {
         this.sql = rule.sql;
         this.priority = rule.priority;
         this.roles = rule.roles;
-        this.execution_interval_ms = rule.execution_interval_ms;
-        this.max_error_count = rule.max_error_count;
-        this.timeout_ms = rule.timeout_ms;
-        this.start_time = rule.start_time;
-        this.end_time = rule.end_time;
-        this.notification_enabled = rule.notification_enabled;
-        this.is_active = rule.is_active;
-        this.silence_mode = rule.silence_mode;
-        this.postpone_date = rule.postpone_date;
-        this.user_creator_id = rule.user_creator_id;
-        this.created_at = rule.created_at;
-        this.updated_at = rule.updated_at;
+        this.executionIntervalMs = rule.executionIntervalMs;
+        this.maxErrorCount = rule.maxErrorCount;
+        this.timeoutMs = rule.timeoutMs;
+        this.startTime = rule.startTime;
+        this.endTime = rule.endTime;
+        this.notificationEnabled = rule.notificationEnabled;
+        this.isActive = rule.isActive;
+        this.silenceMode = rule.silenceMode;
+        this.postponeDate = rule.postponeDate;
+        this.userCreatorId = rule.userCreatorId;
+        this.createdAt = rule.createdAt;
+        this.updatedAt = rule.updatedAt;
     }
 
-    validateBusinessRules() {
+    validateBusinessLogic() {
         if(this.name.length > 100) {
             throw new ValidationError('Name must be between 1 and 100 characters');
         }
@@ -33,19 +33,19 @@ export class Rules {
         if(!(this.priority === 'LOW' || this.priority === 'MEDIUM' || this.priority === 'HIGH')) {
             throw new ValidationError('Priority must be LOW, MEDIUM, or HIGH');
         }
-        if (this.execution_interval_ms <= 0) {
+        if (this.executionIntervalMs <= 0) {
             throw new ValidationError('Execution interval must be positive');
         }
-        if (this.max_error_count < 0) {
+        if (this.maxErrorCount < 0) {
             throw new ValidationError('Max error count cannot be negative');
         }
-        if (this.timeout_ms <= 0) {
+        if (this.timeoutMs <= 0) {
             throw new ValidationError('Timeout must be positive');
         }
-        if (this.start_time >= this.end_time) {
+        if (this.startTime >= this.endTime) {
             throw new ValidationError('Start time must be before end time');
         }
-        if (this.postpone_date && this.postpone_date < new Date()) {
+        if (this.postponeDate && this.postponeDate < new Date()) {
             throw new ValidationError('Postpone date must be in the future');
         }
         if (!sqlValidantion(this.sql)) {

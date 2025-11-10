@@ -46,16 +46,16 @@ export const RuleRepository = {
             ruleData.description,
             ruleData.sql,
             ruleData.priority,
-            ruleData.execution_interval_ms,
-            ruleData.max_error_count,
-            ruleData.timeout_ms,
-            ruleData.start_time,
-            ruleData.end_time,
-            ruleData.notification_enabled,
-            ruleData.is_active,
-            ruleData.silence_mode,
-            ruleData.postpone_date,
-            ruleData.user_creator_id
+            ruleData.executionIntervalMs,
+            ruleData.maxErrorCount,
+            ruleData.timeoutMs,
+            ruleData.startTime,
+            ruleData.endTime,
+            ruleData.notificationEnabled,
+            ruleData.isActive,
+            ruleData.silenceMode,
+            ruleData.postponeDate,
+            ruleData.userCreatorId
         ];
         
         const ruleDB = await pool.query(insertRuleQuery, values);

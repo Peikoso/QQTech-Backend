@@ -12,7 +12,7 @@ export const RoleService = {
     createRole: async (roleData) => {
         const dto = new CreateRolesDto(roleData).validate();
         
-        new Roles(dto).validateBusinessRules();
+        new Roles(dto).validateBusinessLogic();
 
         const newRole = await RoleRepository.create(dto);
 

@@ -22,26 +22,47 @@ export const IncidentsRepository = {
 
         const result = await pool.query(selectIdQuery, [id]);
 
+        if(!result.rows[0]){
+            return null;
+        }
+
         return new Incidents(result.rows[0]);
     },
 
-    create: async(incidentData) => {
+    create: async(incident) => {
         const insertIncidentQuery =
         `
         INSERT INTO incidents
         (assigned_user_id, rule_id, status, priority)
         VALUES ($1, $2, $3, $4)
-        RETURNING *;
+        RETURNING id;
         `
 
         const values = [
-            incidentData.assignedUserId,
-            incidentData.ruleId,
-            incidentData.status,
-            incidentData.priority
+            incident.assignedUserId,
+            incident.ruleId,
+            incident.status,
+            incident.priority
         ]
 
-        const result = await pool.query(insertIncidentQuery, values);
+        const incidentDB = await pool.query(insertIncidentQuery, values);
+
+        const insertRoleIncidentQuery = ` INSERT INTO incidents_roles (incident_id, role_id) VALUES ($1, $2); `;
+
+        for (const roleId of incident.roles) {
+            await pool.query(insertRoleIncidentQuery, [incidentDB.rows[0].id, roleId]);
+        }
+
+        const incidentWithRolesQuery =
+        `
+        SELECT i.*, array_agg(ir.role_id) AS roles
+        FROM incidents i
+        LEFT JOIN incidents_roles ir ON i.id = ir.incident_id
+        WHERE i.id = $1
+        GROUP BY i.id;
+        `;
+
+        const result = await pool.query(incidentWithRolesQuery, [incidentDB.rows[0].id]);
 
         return new Incidents(result.rows[0]);
     }

@@ -1,15 +1,16 @@
 import { IncidentsRepository } from "../repositories/incidents.js";
-import { CreateIncidentsDto } from "../dto/incidents/createIncidentsDto.js";
-import { ResponseIncidentsDto } from '../dto/incidents/responseIncidentsDto.js';
 import { Incidents } from '../models/incidents.js';
 import { isValidUuid } from "../utils/valid_uuid.js";
 import { ValidationError, NotFoundError } from "../utils/errors.js";
 import { RoleService } from "./roles.js";
+import { RuleService } from "./rules.js";
+import { UserService } from "./users.js";
 
 export const IncidentService = {
     getAllIncidents: async () => {
         const incidents = await IncidentsRepository.findAll();
-        return ResponseIncidentsDto.fromArray(incidents);
+
+        return incidents;
     },
 
     getIncidentById: async (id) => {
@@ -23,21 +24,22 @@ export const IncidentService = {
             throw new NotFoundError('Incident not found.');
         }
 
-        return new ResponseIncidentsDto(incident);
+        return incident;
 
     },
 
-    createIncident: async (incidentData) => {
-        const dto = new CreateIncidentsDto(incidentData).validate();
-
+    createIncident: async (dto) => {
         const newIncident = new Incidents(dto);
 
-        for(roleId of newIncident.roles){
+        await UserService.getUserById(newIncident.assignedUserId);
+        await RuleService.getRuleById(newIncident.ruleId);
+
+        for(const roleId of newIncident.roles){
             await RoleService.getRoleById(roleId);
         }
 
         const savedIncident = await IncidentsRepository.create(newIncident);
 
-        return new ResponseIncidentsDto(savedIncident);
+        return savedIncident;
     }
 }

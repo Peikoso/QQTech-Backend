@@ -31,6 +31,10 @@ export const UsersRepository = {
 
         const result = await pool.query(selectIdQuery, [id]);
 
+        if(!result.rows[0]){
+            return null;
+        }
+
         return new Users(result.rows[0]);
     },
 

@@ -9,18 +9,18 @@ export class Rules {
         this.sql = rule.sql;
         this.priority = rule.priority;
         this.roles = rule.roles;
-        this.executionIntervalMs = rule.executionIntervalMs;
-        this.maxErrorCount = rule.maxErrorCount;
-        this.timeoutMs = rule.timeoutMs;
-        this.startTime = rule.startTime;
-        this.endTime = rule.endTime;
-        this.notificationEnabled = rule.notificationEnabled;
-        this.isActive = rule.isActive;
-        this.silenceMode = rule.silenceMode;
-        this.postponeDate = rule.postponeDate;
-        this.userCreatorId = rule.userCreatorId;
-        this.createdAt = rule.createdAt;
-        this.updatedAt = rule.updatedAt;
+        this.executionIntervalMs = rule.execution_interval_ms ?? rule.executionIntervalMs;
+        this.maxErrorCount = rule.max_error_count ?? rule.maxErrorCount;
+        this.timeoutMs = rule.timeout_ms ?? rule.timeoutMs;
+        this.startTime = rule.start_time ?? rule.startTime;
+        this.endTime = rule.end_time ?? rule.endTime;
+        this.notificationEnabled = rule.notification_enabled ?? rule.notificationEnabled;
+        this.isActive = rule.is_active ?? rule.isActive;
+        this.silenceMode = rule.silence_mode ?? rule.silenceMode;
+        this.postponeDate = rule.postpone_date ?? rule.postponeDate;
+        this.userCreatorId = rule.user_creator_id ?? rule.userCreatorId;
+        this.createdAt = rule.created_at ?? rule.createdAt;
+        this.updatedAt = rule.updated_at ?? rule.updatedAt;
     }
 
     static fromArray(rulesArray) {

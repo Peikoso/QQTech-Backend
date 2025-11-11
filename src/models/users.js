@@ -1,7 +1,7 @@
 export class Users {
     constructor(user){
         this.id = user.id;
-        this.firebase_uid = user.firebase_uid;
+        this.firebase_uid = user.firebase_uid ?? user.firebaseUid;
         this.name = user.name;
         this.matricula = user.matricula;
         this.email = user.email;
@@ -10,12 +10,12 @@ export class Users {
         this.profile = user.profile;
         this.roles = user.roles;
         this.pending = user.pending;
-        this.createdAt = user.createdAt;
-        this.updatedAt = user.updatedAt;
-        this.push_enabled = user.push_enabled;
-        this.email_enabled = user.email_enabled;
-        this.comuniq_enabled = user.comuniq_enabled;
-        this.push_sound_enabled = user.push_sound_enabled;
+        this.createdAt = user.created_at ?? user.createdAt;
+        this.updatedAt = user.updated_at ?? user.updatedAt;
+        this.pushEnabled = user.push_enabled ?? user.pushEnabled;
+        this.emailEnabled = user.email_enabled ?? user.emailEnabled;
+        this.comuniqEnabled = user.comuniq_enabled ?? user.comuniqEnabled;
+        this.pushSoundEnabled = user.push_sound_enabled ?? user.pushSoundEnabled;
     }
 
     static fromArray(usersArray) {

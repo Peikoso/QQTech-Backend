@@ -3,6 +3,7 @@ import { Rules } from '../models/rules.js';
 import { RoleService } from './roles.js';
 import { ValidationError, NotFoundError } from '../utils/errors.js';
 import { isValidUuid } from '../utils/valid_uuid.js'
+import { UserService } from './users.js';
 
 export const RuleService = {
     getAllRules: async () => {
@@ -27,6 +28,8 @@ export const RuleService = {
 
     createRule: async (dto) => {
         const newRule = new Rules(dto).validateBusinessLogic();
+
+        await UserService.getUserById(newRule.userCreatorId);
 
         for(const roleId of newRule.roles){
             await RoleService.getRoleById(roleId);

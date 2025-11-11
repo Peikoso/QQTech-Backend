@@ -22,6 +22,10 @@ export const RolesRepository = {
 
         const result = await pool.query(selectIdQuery, [id]);
 
+        if(!result.rows[0]){
+            return null;
+        }
+
         return new Roles(result.rows[0]);
     },
 

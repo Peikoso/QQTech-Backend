@@ -1,10 +1,15 @@
 import { UserService } from "../services/users.js";
+import { CreateUsersDto } from "../dto/users/createUsersDto.js";
+import { ResponseUsersDto } from "../dto/users/responseUsersDto.js";
 
 export const UsersController = {
     getAllUsers: async  (req, res) => {
         try{
             const users = await UserService.getAllUsers();
-            return res.status(200).json(users);
+
+            const response = ResponseUsersDto.fromArray(users);
+
+            return res.status(200).json(response);
         } catch (error){
             console.error(error);
             return res.status(500).json({ error: 'Internal Server Error' });
@@ -16,7 +21,10 @@ export const UsersController = {
             const id = req.params.id;
             
             const user = await UserService.getUserById(id);
-            return res.status(200).json(user);
+
+            const response = new ResponseUsersDto(user);
+
+            return res.status(200).json(response);
         } catch (error){
             if(error.name === 'NotFoundError'){
                 return res.status(error.status).json({error: error.message})
@@ -32,8 +40,14 @@ export const UsersController = {
     createUser: async (req, res) => {
         try{
             const userData = req.body;
-            const newUser = await UserService.createUser(userData);
-            return res.status(201).json(newUser)
+
+            const dto = new CreateUsersDto(userData).validate();
+
+            const newUser = await UserService.createUser(dto);
+
+            const response = new ResponseUsersDto(newUser);
+            
+            return res.status(201).json(response);
         } catch (error){
             if (error.name === 'ValidationError') {
                 return res.status(error.status).json({ error: error.message });

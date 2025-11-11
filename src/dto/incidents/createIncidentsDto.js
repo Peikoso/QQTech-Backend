@@ -4,7 +4,6 @@ export class CreateIncidentsDto {
     constructor(incident) {
         this.assignedUserId = incident.assignedUserId?.trim();
         this.ruleId = incident.ruleId?.trim();
-        this.status = 'OPEN';
         this.priority = incident.priority?.trim();
         this.roles = Array.isArray(incident.roles) ? [...new Set(incident.roles)] : [];
     }
@@ -15,9 +14,6 @@ export class CreateIncidentsDto {
         }
         if (!this.ruleId) {
             throw new ValidationError('ruleId is required');
-        }
-        if (!(this.status === 'OPEN' || this.status === 'ACK' || this.status === 'CLOSED')) {
-            throw new ValidationError('Status must be OPEN, ACK, or CLOSED');
         }
         if (!(this.priority === 'LOW' || this.priority === 'MEDIUM' || this.priority === 'HIGH')) {
             throw new ValidationError('Priority must be LOW, MEDIUM, or HIGH');

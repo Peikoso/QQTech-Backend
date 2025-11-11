@@ -30,10 +30,14 @@ export const RulesRepository = {
 
        const result = await pool.query(selectIdQuery, [id]);
 
+        if(!result.rows[0]){
+            return null;
+        }
+
        return new Rules(result.rows[0]);
     },
 
-    create: async (ruleData) => {
+    create: async (rule) => {
         const insertRuleQuery = 
         `
         INSERT INTO rules
@@ -43,27 +47,27 @@ export const RulesRepository = {
         `;
         
         const values = [
-            ruleData.name,
-            ruleData.description,
-            ruleData.sql,
-            ruleData.priority,
-            ruleData.executionIntervalMs,
-            ruleData.maxErrorCount,
-            ruleData.timeoutMs,
-            ruleData.startTime,
-            ruleData.endTime,
-            ruleData.notificationEnabled,
-            ruleData.isActive,
-            ruleData.silenceMode,
-            ruleData.postponeDate,
-            ruleData.userCreatorId
+            rule.name,
+            rule.description,
+            rule.sql,
+            rule.priority,
+            rule.executionIntervalMs,
+            rule.maxErrorCount,
+            rule.timeoutMs,
+            rule.startTime,
+            rule.endTime,
+            rule.notificationEnabled,
+            rule.isActive,
+            rule.silenceMode,
+            rule.postponeDate,
+            rule.userCreatorId
         ];
         
         const ruleDB = await pool.query(insertRuleQuery, values);
 
         const insertRoleRuleQuery = ` INSERT INTO rules_roles (rule_id, role_id) VALUES ($1, $2); `;
 
-        for (const roleId of ruleData.roles) {
+        for (const roleId of rule.roles) {
             await pool.query(insertRoleRuleQuery, [ruleDB.rows[0].id, roleId]);
         }
 
@@ -82,7 +86,7 @@ export const RulesRepository = {
         return new Rules(result.rows[0]);
     },
 
-    update: async (id, ruleData) => {
+    update: async (id, rule) => {
         // Lógica para atualizar uma regra existente no banco de dados
     },
 

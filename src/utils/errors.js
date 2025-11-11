@@ -14,3 +14,10 @@ export class NotFoundError extends Error {
   }
 }
 
+export class BusinessLogicError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'BusinessLogicError';
+        this.status = 400; // Bad Request
+    }
+}

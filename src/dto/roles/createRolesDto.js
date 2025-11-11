@@ -2,9 +2,9 @@ import { ValidationError } from "../../utils/errors.js";
 
 export class CreateRolesDto {
     constructor(role) {
-        this.name = role.name;
-        this.color = role.color;
-        this.description = role.description;
+        this.name = role.name?.trim();
+        this.color = role.color?.trim();
+        this.description = role.description?.trim();
     }
     
     validate() {

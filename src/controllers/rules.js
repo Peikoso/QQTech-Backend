@@ -1,10 +1,15 @@
 import { RuleService } from '../services/rules.js';
+import { ResponseRulesDto } from '../dto/rules/responseRulesDto.js';
+import { CreateRulesDto } from '../dto/rules/createRulesDto.js';
 
 export const RulesController = {
     getAllRules: async (req, res) => {
         try {
             const rules = await RuleService.getAllRules();
-            return res.status(200).json(rules);
+
+            const response = ResponseRulesDto.fromArray(rules);
+
+            return res.status(200).json(response);
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error: 'Internal Server Error' });
@@ -16,7 +21,10 @@ export const RulesController = {
             const id = req.params.id;
 
             const rule = await RuleService.getRuleById(id);
-            return res.status(200).json(rule);
+
+            const response = new ResponseRulesDto(rule);
+
+            return res.status(200).json(response);
         } catch (error){
             if(error.name === 'NotFoundError'){
                 return res.status(error.status).json({ error: error.message });
@@ -32,8 +40,14 @@ export const RulesController = {
     createRule: async (req, res) => {
         try {
             const ruleData = req.body;
-            const newRule = await RuleService.createRule(ruleData);
-            return res.status(201).json(newRule);
+
+            const dto = new CreateRulesDto(ruleData).validate();
+
+            const newRule = await RuleService.createRule(dto);
+
+            const response = new ResponseRulesDto(newRule);
+
+            return res.status(201).json(response);
         } catch (error) {
             if (error.name === 'ValidationError') {
                 return res.status(error.status).json({ error: error.message });

@@ -1,13 +1,12 @@
 import { ValidationError } from '../../utils/errors.js';
-import { sqlValidantion } from '../../utils/sql_validation.js';
 
 export class CreateRulesDto {
     constructor(rule) {
-        this.name = rule.name;
-        this.description = rule.description;
-        this.sql = rule.sql;
-        this.priority = rule.priority;
-        this.roles = Array.isArray(rule.roles) ? [...new set(rule.roles)] : [];
+        this.name = rule.name?.trim();
+        this.description = rule.description?.trim();
+        this.sql = rule.sql?.trim();
+        this.priority = rule.priority?.trim();
+        this.roles = Array.isArray(rule.roles) ? [...new Set(rule.roles)] : [];
         this.executionIntervalMs = Number(rule.executionIntervalMs);
         this.maxErrorCount = Number(rule.maxErrorCount);
         this.timeoutMs = Number(rule.timeoutMs);
@@ -17,7 +16,7 @@ export class CreateRulesDto {
         this.isActive = rule.isActive;
         this.silenceMode = rule.silenceMode;
         this.postponeDate = rule.postponeDate;
-        this.userCreatorId = rule.userCreatorId;
+        this.userCreatorId = rule.userCreatorId?.trim();
     }
 
     validateTimeFormat(time) {
@@ -36,7 +35,7 @@ export class CreateRulesDto {
         if(typeof this.sql !== 'string' || this.sql.trim() === '') {
             throw new ValidationError('SQL is required and must be a non-empty string');
         }
-        if(typeof this.priority !== 'string' || this.priority.trim() === '') {
+        if(!(this.priority === 'LOW' || this.priority === 'MEDIUM' || this.priority === 'HIGH')) {
             throw new ValidationError('Priority must be LOW, MEDIUM, or HIGH');
         }
         if(!Array.isArray(this.roles) || this.roles.length === 0 || !this.roles.every(role => typeof role === 'string')) {
@@ -77,27 +76,6 @@ export class CreateRulesDto {
         }
         if(this.description.length > 255) {
             throw new ValidationError('Description must be between 1 and 255 characters');
-        }
-        if(!(this.priority === 'LOW' || this.priority === 'MEDIUM' || this.priority === 'HIGH')) {
-            throw new ValidationError('Priority must be LOW, MEDIUM, or HIGH');
-        }
-        if (this.executionIntervalMs <= 0) {
-            throw new ValidationError('Execution interval must be positive');
-        }
-        if (this.maxErrorCount < 0) {
-            throw new ValidationError('Max error count cannot be negative');
-        }
-        if (this.timeoutMs <= 0) {
-            throw new ValidationError('Timeout must be positive');
-        }
-        if (this.startTime >= this.endTime) {
-            throw new ValidationError('Start time must be before end time');
-        }
-        if (this.postponeDate && this.postponeDate < new Date()) {
-            throw new ValidationError('Postpone date must be in the future');
-        }
-        if (!sqlValidantion(this.sql)) {
-            throw new ValidationError('SQL contains forbidden commands');
         }
         
         return this;

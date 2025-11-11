@@ -2,11 +2,11 @@ import { ValidationError } from '../../utils/errors.js'
 
 export class CreateIncidentsDto { 
     constructor(incident) {
-        this.assignedUserId = incident.assignedUserId;
-        this.ruleId = incident.ruleId;
+        this.assignedUserId = incident.assignedUserId?.trim();
+        this.ruleId = incident.ruleId?.trim();
         this.status = 'OPEN';
-        this.priority = incident.priority;
-        this.roles = Array.isArray(incident.roles) ? [...new set(incident.roles)] : [];
+        this.priority = incident.priority?.trim();
+        this.roles = Array.isArray(incident.roles) ? [...new Set(incident.roles)] : [];
     }
 
     validate() {

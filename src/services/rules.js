@@ -1,6 +1,4 @@
 import { RulesRepository } from '../repositories/rules.js';
-import { ResponseRulesDto } from '../dto/rules/responseRulesDto.js';
-import { CreateRulesDto } from '../dto/rules/createRulesDto.js';
 import { Rules } from '../models/rules.js';
 import { RoleService } from './roles.js';
 import { ValidationError, NotFoundError } from '../utils/errors.js';
@@ -9,7 +7,8 @@ import { isValidUuid } from '../utils/valid_uuid.js'
 export const RuleService = {
     getAllRules: async () => {
         const rules = await RulesRepository.findAll();
-        return ResponseRulesDto.fromArray(rules);
+
+        return rules;
     },
 
     getRuleById: async (id) => {
@@ -23,21 +22,19 @@ export const RuleService = {
             throw new NotFoundError('Rule not found.')
         }
 
-        return new ResponseRulesDto(rule);
+        return rule;
     },
 
-    createRule: async (ruleData) => {
-        const dto = new CreateRulesDto(ruleData).validate();
-
-        const newRule = new Rules(dto);
+    createRule: async (dto) => {
+        const newRule = new Rules(dto).validateBusinessLogic();
 
         for(const roleId of newRule.roles){
             await RoleService.getRoleById(roleId);
         }
 
         const savedRule = await RulesRepository.create(newRule);
-        
-        return new ResponseRulesDto(savedRule);
+
+        return savedRule;
     },
 
     updateRule: async (id, ruleData) => {

@@ -2,9 +2,9 @@ import { ValidationError } from '../../utils/errors.js';
 
 export class CreateUsersDto {
     constructor(user){
-        this.name = user.name;
-        this.matricula = user.matricula;
-        this.email = user.email;
+        this.name = user.name?.trim();
+        this.matricula = user.matricula?.trim();
+        this.email = user.email?.trim();
         this.profile = user.profile ?? 'viewer';
         this.roles = Array.isArray(user.roles) ? [...new Set(user.roles)] : [];
         this.pending = user.pending ?? true;
@@ -25,9 +25,6 @@ export class CreateUsersDto {
         }
         if(typeof this.email !== 'string' || this.email.trim() === '') {
             throw new ValidationError('Email is required and must be a non-empty string');
-        }
-        if(typeof this.profile !== 'string' || this.profile.trim() === '') {
-            throw new ValidationError('Profile is required and must be a non-empty string');
         }
         if(!Array.isArray(this.roles) || !this.roles.every(role => typeof role === 'string')) {
             throw new ValidationError('Roles must be a non-empty array of strings or a empty array');
@@ -59,7 +56,6 @@ export class CreateUsersDto {
         if(!(this.profile === 'admin' || this.profile === 'operator' || this.profile === 'viewer')){
             throw new ValidationError('Profile must be admin, operator, or viewer');
         }
-
 
         return this;
     }

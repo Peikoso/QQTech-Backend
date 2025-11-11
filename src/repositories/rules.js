@@ -1,6 +1,6 @@
 import { pool } from '../config/database_conn.js';
 
-export const RuleRepository = {
+export const RulesRepository = {
     findAll: async () => {
         const result = await pool.query(
             `
@@ -77,6 +77,7 @@ export const RuleRepository = {
         `;
 
         const result = await pool.query(ruleWithRolesQuery, [ruleDB.rows[0].id]);
+        
         return result.rows[0];
     },
 

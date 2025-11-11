@@ -38,6 +38,9 @@ export const RulesController = {
             if (error.name === 'ValidationError') {
                 return res.status(error.status).json({ error: error.message });
             }
+            if(error.name === 'NotFoundError'){
+                return res.status(error.status).json({ error: error.message });
+            }
             console.error(error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }

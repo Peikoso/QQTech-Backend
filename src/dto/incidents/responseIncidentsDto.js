@@ -5,6 +5,7 @@ export class ResponseIncidentsDto {
         this.ruleId = incident.ruleId;
         this.status = incident.status;
         this.priority = incident.priority;
+        this.roles = incident.roles;
         this.ackAt = incident.ackAt;
         this.closedAt = incident.closedAt;
         this.createdAt = incident.createdAt;

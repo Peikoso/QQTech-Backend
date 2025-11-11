@@ -1,6 +1,6 @@
 import { pool } from '../config/database_conn.js';
 
-export const UserRepository = {
+export const UsersRepository = {
     findAll: async () => {
         const result = await pool.query(
             `
@@ -12,6 +12,7 @@ export const UserRepository = {
             ORDER BY created_at DESC;
             `
         );
+        
         return result.rows;
     },
 
@@ -67,6 +68,7 @@ export const UserRepository = {
         `;
 
         const result = await pool.query(userWithRolesQuery, [userDB.rows[0].id]);
+        
         return result.rows[0];
     }
 };

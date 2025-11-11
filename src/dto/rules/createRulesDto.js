@@ -6,7 +6,7 @@ export class CreateRulesDto {
         this.description = rule.description;
         this.sql = rule.sql;
         this.priority = rule.priority;
-        this.roles = rule.roles;
+        this.roles = Array.isArray(rule.roles) ? [...new set(rule.roles)] : [];
         this.executionIntervalMs = Number(rule.executionIntervalMs);
         this.maxErrorCount = Number(rule.maxErrorCount);
         this.timeoutMs = Number(rule.timeoutMs);

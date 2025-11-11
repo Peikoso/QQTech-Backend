@@ -6,7 +6,7 @@ export class CreateUsersDto {
         this.matricula = user.matricula;
         this.email = user.email;
         this.profile = user.profile ?? 'viewer';
-        this.roles = user.roles ?? [];
+        this.roles = Array.isArray(user.roles) ? [...new Set(user.roles)] : [];
         this.pending = user.pending ?? true;
         this.createdAt = user.createdAt;
         this.updatedAt = user.updatedAt;

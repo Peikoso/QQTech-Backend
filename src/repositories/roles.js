@@ -1,14 +1,27 @@
 import { pool } from '../config/database_conn.js';
 
-export const RoleRepository = {
-    findAll: async () =>{
+export const RolesRepository = {
+    findAll: async () => {
         const result = await pool.query(
             `
             SELECT * FROM roles
             ORDER BY created_at DESC;
             `
         );
+
         return result.rows;
+    },
+
+    findById: async (id) => {
+        const selectIdQuery =
+        `
+        SELECT * FROM roles
+        WHERE id = $1
+        `
+
+        const result = await pool.query(selectIdQuery, [id]);
+
+        return result.rows[0];
     },
 
     create: async(roleData) =>{

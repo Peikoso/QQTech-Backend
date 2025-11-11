@@ -18,7 +18,7 @@ export const RolesController = {
             return res.status(201).json(newRole);
         } catch (error) {
             if(error.name === 'ValidationError'){
-                return res.status(422).json({ error: error.message });
+                return res.status(422).json({error: error.message});
             }
             console.error(error)
             return res.status(500).json({ error: 'Internal Server Error.' });

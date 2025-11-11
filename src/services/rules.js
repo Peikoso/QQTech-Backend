@@ -1,22 +1,23 @@
-import { RuleRepository } from '../repositories/rules.js';
+import { RulesRepository } from '../repositories/rules.js';
 import { ResponseRulesDto } from '../dto/rules/responseRulesDto.js';
 import { CreateRulesDto } from '../dto/rules/createRulesDto.js';
 import { Rules } from '../models/rules.js';
+import { RoleService } from './roles.js';
 import { ValidationError, NotFoundError } from '../utils/errors.js';
 import { isValidUuid } from '../utils/valid_uuid.js'
 
 export const RuleService = {
     getAllRules: async () => {
-        const rules = await RuleRepository.findAll();
+        const rules = await RulesRepository.findAll();
         return ResponseRulesDto.fromArray(rules);
     },
 
     getRuleById: async (id) => {
         if(!isValidUuid(id)){
-            throw new ValidationError('Invalid UUID.')
+            throw new ValidationError('Invalid Rule UUID.')
         }
 
-        const rule = await RuleRepository.findById(id)
+        const rule = await RulesRepository.findById(id)
 
         if(!rule){
             throw new NotFoundError('Rule not found.')
@@ -26,13 +27,17 @@ export const RuleService = {
     },
 
     createRule: async (ruleData) => {
-       const dto = new CreateRulesDto(ruleData).validate();
+        const dto = new CreateRulesDto(ruleData).validate();
 
-       new Rules(dto).validateBusinessLogic();
+        new Rules(dto).validateBusinessLogic();
 
-       const newRule = await RuleRepository.create(dto);
+        for(const roleId of dto.roles){
+            await RoleService.getRoleById(roleId);
+        }
 
-       return new ResponseRulesDto(newRule);
+        const newRule = await RulesRepository.create(dto);
+
+        return new ResponseRulesDto(newRule);
     },
 
     updateRule: async (id, ruleData) => {

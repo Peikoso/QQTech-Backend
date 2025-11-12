@@ -21,3 +21,11 @@ export class BusinessLogicError extends Error {
         this.status = 400; // Bad Request
     }
 }
+
+export class UnauthorizedError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'UnauthorizedError';
+        this.status = 401; // Unauthorized
+    }
+}

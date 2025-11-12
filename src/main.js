@@ -3,13 +3,14 @@ import express from 'express';
 import cors from 'cors';
 import process from 'process';
 import routes from './routers/index.js';
-import { authMiddleware } from './middleware/authMiddleware.js';
+import { AuthMiddleware } from './middleware/authMiddleware.js';
+import { ErrorMiddleware } from './middleware/errorMiddleware.js';
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(authMiddleware);
+//app.use(AuthMiddleware);
 
 
 const PORT = process.env.PORT || 8000;
@@ -19,6 +20,7 @@ app.get('/', async(req, res) => {
 });
 
 app.use('/api/v1', routes);
+app.use(ErrorMiddleware);
 
 // Tratamento de erros não capturados
 process.on('unhandledRejection', (reason, promise) => {

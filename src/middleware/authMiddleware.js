@@ -1,10 +1,11 @@
 import { AuthService } from "../services/auth.js";
+import { UnauthorizedError } from "../utils/errors.js";
 
-export const authMiddleware = async (req, res, next) => {
+export const AuthMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Token not provided." });
+    throw new UnauthorizedError("Token not provided.");
   }
 
   const token = authHeader.split(" ")[1];
@@ -14,6 +15,6 @@ export const authMiddleware = async (req, res, next) => {
     req.user = decodedUser; // usuário disponível em qualquer controller
     next();
   } catch (error) {
-    return res.status(401).json({ message: error.message });
+    throw new UnauthorizedError(error.message);
   }
 };

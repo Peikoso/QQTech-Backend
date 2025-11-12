@@ -36,14 +36,14 @@ export class CreateRulesDto {
         if(!Array.isArray(this.roles) || this.roles.length === 0 || !this.roles.every(role => typeof role === 'string')) {
             throw new ValidationError('Roles must be a non-empty array of strings');
         }
-        if(isNaN(this.executionIntervalMs)) {
-            throw new ValidationError('Execution interval must be a number');
+        if(isNaN(this.executionIntervalMs) || !Number.isInteger(this.executionIntervalMs)) {
+            throw new ValidationError('Execution interval must be a integer number');
         }
-        if(isNaN(this.maxErrorCount)) {
-            throw new ValidationError('Max error count must be a number');
+        if(isNaN(this.maxErrorCount) || !Number.isInteger(this.maxErrorCount)) {
+            throw new ValidationError('Max error count must be a integer number');
         }
-        if(isNaN(this.timeoutMs)) {
-            throw new ValidationError('Timeout must be a number');
+        if(isNaN(this.timeoutMs) || !Number.isInteger(this.timeoutMs)) {
+            throw new ValidationError('Timeout must be a integer number');
         }
         if(!validateTimeFormat(this.startTime)) {
             throw new ValidationError('Start time must be in the format HH:MM:SS');

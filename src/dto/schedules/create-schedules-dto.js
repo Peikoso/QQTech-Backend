@@ -3,10 +3,10 @@ import { validateTimestampFormat } from '../../utils/validations.js';
 
 export class CreateSchedulesDto {
     constructor(schedule) {
-        this.userId = schedule.userId;
-        this.channel = schedule.channel;
-        this.startTime = schedule.startTime;
-        this.endTime = schedule.endTime;
+        this.userId = schedule.userId?.trim();
+        this.channel = schedule.channel?.trim();
+        this.startTime = schedule.startTime?.trim();
+        this.endTime = schedule.endTime?.trim();
     }
 
     validate() {

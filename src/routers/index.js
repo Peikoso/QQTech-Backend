@@ -5,6 +5,7 @@ import usersRouter from './users.js';
 import rolesRouter from './roles.js';
 import incidentsRouter from './incidents.js'
 import schedulesRouter from './schedules.js';
+import escalationPoliciesRouter from './escalationPolicies.js';
 
 const router = express.Router();
 
@@ -13,5 +14,6 @@ router.use('/users', usersRouter);
 router.use('/roles', rolesRouter);
 router.use('/incidents', incidentsRouter);
 router.use('/schedules', schedulesRouter);
+router.use('/escalation-policies', escalationPoliciesRouter);
 
 export default router;

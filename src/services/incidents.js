@@ -29,16 +29,6 @@ export const IncidentService = {
 
     },
 
-    getIncidentesLogsByIncidentId: async (incidentId) => {
-        if(!isValidUuid(incidentId)){
-            throw new ValidationError('Invalid Incident UUID.');
-        }
-
-        const incidentLogs = await IncidentsLogsRepository.findByIncidentId(incidentId);
-
-        return incidentLogs;
-    },
-
     createIncident: async (dto) => {
         const newIncident = new Incidents(dto);
 
@@ -53,20 +43,32 @@ export const IncidentService = {
 
         return savedIncident;
     }, 
+};
+
+export const IncidentLogService = {
+
+    getIncidentesLogsByIncidentId: async (incidentId) => {
+        if(!isValidUuid(incidentId)){
+            throw new ValidationError('Invalid Incident UUID.');
+        }
+
+        const incidentLogs = await IncidentsLogsRepository.findByIncidentId(incidentId);
+
+        return incidentLogs;
+    },
 
     createIncidentsAction: async (dto) => {
         const newIncidentsLogs = new IncidentsLogs(dto);
-        
+
         await UserService.getUserById(newIncidentsLogs.actionUserId);
         const incident = await IncidentService.getIncidentById(newIncidentsLogs.incidentId);
-        
+
         newIncidentsLogs.nextStatus(incident.status);
         const savedIncidentsLogs = await IncidentsLogsRepository.create(newIncidentsLogs);
-        
+
         incident.updateStatus(savedIncidentsLogs);
         await IncidentsRepository.update(incident);
 
         return savedIncidentsLogs;
     }
-
-}
+};

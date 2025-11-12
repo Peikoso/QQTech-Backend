@@ -1,5 +1,5 @@
 import { pool } from '../config/database_conn.js';
-import { Schedules } from '../models/schedules.js';
+import { Schedules, ScheduleLogs } from '../models/schedules.js';
 
 export const SchedulesRepository = {
     findUpcomingSchedules: async (date) => {
@@ -40,5 +40,41 @@ export const SchedulesRepository = {
         const result = await pool.query(insertQuery, values);
 
         return new Schedules(result.rows[0]);
+    }
+};
+
+export const SchedulesLogsRepository = {
+    findScheduleLogsByScheduleId: async (scheduleId) => {
+        const selectQuery = 
+        `
+        SELECT * FROM schedules_logs
+        WHERE schedule_id = $1
+        ORDER BY log_time DESC
+        `;
+        const result = await pool.query(selectQuery, [scheduleId]);
+        
+        return ScheduleLogs.fromArray(result.rows);
+    },
+
+    create: async (scheduleLog) => {
+        const insertQuery = 
+        `
+        INSERT INTO schedules_logs
+        (schedule_id, user_id, action_type, description, old_value, new_value)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *;
+        `;
+        const values = [
+            scheduleLog.scheduleId,
+            scheduleLog.userId,
+            scheduleLog.actionType,
+            scheduleLog.description,
+            scheduleLog.oldValue,
+            scheduleLog.newValue
+        ];
+
+        const result = await pool.query(insertQuery, values);
+
+        return new ScheduleLogs(result.rows[0]);
     }
 };

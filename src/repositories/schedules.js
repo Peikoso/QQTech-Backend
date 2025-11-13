@@ -1,5 +1,5 @@
 import { pool } from '../config/database-conn.js';
-import { Schedules, ScheduleLogs } from '../models/schedules.js';
+import { Schedules } from '../models/schedules.js';
 
 export const SchedulesRepository = {
     findUpcomingSchedules: async (date) => {

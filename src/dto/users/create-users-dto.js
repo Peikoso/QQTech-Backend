@@ -8,8 +8,6 @@ export class CreateUsersDto {
         this.profile = user.profile ?? 'viewer';
         this.roles = Array.isArray(user.roles) ? [...new Set(user.roles)] : [];
         this.pending = user.pending ?? true;
-        this.createdAt = user.createdAt;
-        this.updatedAt = user.updatedAt;
     }
 
     validate() {

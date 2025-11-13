@@ -2,9 +2,15 @@ import admin from "firebase-admin";
 
 import fs from "fs";
 import path from "path";
+import dotenv from "dotenv";
+import process from "process";
+
+dotenv.config();
+
+const SERVICE_PATH = process.env.SERVICE_PATH;
 
 const serviceAccountPath = path.resolve(
-  "C:/Users/joaod/Desktop/qqtech9-backend/plantao-monitor-firebase-adminsdk.json"
+  SERVICE_PATH
 );
 const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf-8"));
 

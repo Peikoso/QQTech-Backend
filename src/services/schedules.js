@@ -1,5 +1,5 @@
-import { SchedulesRepository, SchedulesLogsRepository } from "../repositories/schedules.js";
-import { Schedules, ScheduleLogs } from "../models/schedules.js";
+import { SchedulesRepository } from "../repositories/schedules.js";
+import { Schedules } from "../models/schedules.js";
 import { NotFoundError, ValidationError } from "../utils/errors.js";
 import { isValidUuid } from "../utils/validations.js";
 import { UserService } from "./users.js";

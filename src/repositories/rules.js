@@ -28,13 +28,13 @@ export const RulesRepository = {
         GROUP BY r.id;
         `;
 
-       const result = await pool.query(selectIdQuery, [id]);
+        const result = await pool.query(selectIdQuery, [id]);
 
         if(!result.rows[0]){
             return null;
         }
 
-       return new Rules(result.rows[0]);
+        return new Rules(result.rows[0]);
     },
 
     create: async (rule) => {

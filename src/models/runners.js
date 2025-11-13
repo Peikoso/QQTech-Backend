@@ -3,12 +3,12 @@ import { BusinessLogicError } from "../utils/errors.js";
 export class Runners {
     constructor(runner){
         this.id = runner.id;
-        this.rule_id = runner.rule_id ?? runner.ruleId;
+        this.ruleId = runner.rule_id ?? runner.ruleId;
         this.status = runner.status;
-        this.last_run_at = runner.last_run_at ?? runner.lastRunAt;
-        this.next_run_at = runner.next_run_at ?? runner.nextRunAt;
-        this.created_at = runner.created_at ?? runner.createdAt;
-        this.updated_at = runner.updated_at ?? runner.updatedAt;
+        this.lastRunAt = runner.last_run_at ?? runner.lastRunAt;
+        this.nextRunAt = runner.next_run_at ?? runner.nextRunAt;
+        this.createdAt = runner.created_at ?? runner.createdAt;
+        this.updatedAt = runner.updated_at ?? runner.updatedAt;
     }
 
     static fromArray(runnersArray) {   
@@ -16,9 +16,13 @@ export class Runners {
     }
 
     validateBusinessLogic() {
-        if(this.last_run_at > this.next_run_at) {
+        if(this.lastRunAt > this.nextRunAt) {
             throw new BusinessLogicError('Last run time must be before next run time');
         }
+        if(this.status !== 'active' && this.status !== 'inactive') {
+            throw new BusinessLogicError('Status must be either active or inactive');
+        }
+
         return this;
     }
     
@@ -27,15 +31,15 @@ export class Runners {
 export class RunnerLogs {
     constructor(runnerLog){
         this.id = runnerLog.id;
-        this.runner_id = runnerLog.runner_id ?? runnerLog.runnerId;
-        this.run_time_ms = runnerLog.run_time_ms ?? runnerLog.runTimeMs;
+        this.runnerId = runnerLog.runner_id ?? runnerLog.runnerId;
+        this.runTimeMs = runnerLog.run_time_ms ?? runnerLog.runTimeMs;
         this.result = runnerLog.result;
         this.error = runnerLog.error;
-        this.executed_at = runnerLog.executed_at ?? runnerLog.executedAt;
+        this.executedAt = runnerLog.executed_at ?? runnerLog.executedAt;
     }
 
     validateBusinessLogic() {
-        if(this.run_time_ms <= 0) {
+        if(this.runTimeMs <= 0) {
             throw new BusinessLogicError('Run time must be positive');
         }
 

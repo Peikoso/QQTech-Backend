@@ -4,7 +4,6 @@ import { ValidationError, NotFoundError } from '../utils/errors.js';
 import { isValidUuid } from '../utils/validations.js'
 import { UserService } from './users.js';
 import { RoleService } from './roles.js';
-import { RunnerService } from './runners.js';
 
 export const RuleService = {
     getAllRules: async () => {
@@ -37,8 +36,6 @@ export const RuleService = {
         }
 
         const savedRule = await RulesRepository.create(newRule);
-
-        await RunnerService.createRunner(savedRule.id, 'active');
 
         return savedRule;
     },

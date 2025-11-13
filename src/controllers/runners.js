@@ -10,6 +10,18 @@ export const RunnersController = {
 
         return res.status(200).json(response);
     },
+
+    createRunner: async (req, res) => {
+        const runnerData = req.body;
+
+        const dot = new CreateRunnerLogsDto(runnerData).validate();
+
+        const newRunner = await RunnerService.createRunner(dot);
+
+        const response = new ResponseRunnersDto(newRunner);
+
+        return res.status(201).json(response);
+    }
 }
 
 export const RunnerLogsController = {

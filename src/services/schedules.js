@@ -45,46 +45,6 @@ export const ScheduleService = {
 
         const savedSchedule = await SchedulesRepository.update(id, updatedScheduleEntity);
 
-        await ScheduleLogService.createScheduleLog(
-            id,
-            userId,
-            "UPDATE",
-            "Schedule updated",
-            existingSchedule,
-            savedSchedule
-        );
-        
         return savedSchedule;
-    }
-};
-
-export const ScheduleLogService = {
-    getScheduleLogsByScheduleId: async (id) => {
-        if(!isValidUuid(id)) {
-            throw new ValidationError(`Invalid UUID.`);
-        }
-
-        await ScheduleService.getScheduleById(id);
-        
-        const scheduleLogs = await SchedulesLogsRepository.findScheduleLogsByScheduleId(id);
-        
-        return scheduleLogs;
-    },
-
-    createScheduleLog: async (scheduleId, userId, actionType, description, oldValue, newValue) => {
-        const newScheduleLog = new ScheduleLogs(
-            {
-                scheduleId: scheduleId,
-                userId: userId,
-                actionType: actionType,
-                description: description,
-                oldValue: JSON.stringify(oldValue),
-                newValue: JSON.stringify(newValue)
-            }
-        );
-
-        const savedScheduleLog = await SchedulesLogsRepository.create(newScheduleLog);
-        
-        return savedScheduleLog;
     }
 };

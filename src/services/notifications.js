@@ -28,8 +28,6 @@ export const NotificationService = {
         await ChannelService.getChannelById(newNotification.channelId);
         await IncidentService.getIncidentById(newNotification.incidentId);
 
-        console.log('Creating notification:', newNotification);
-
         const savedNotification = await NotificationsRepository.create(newNotification);
 
         return savedNotification;

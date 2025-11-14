@@ -48,6 +48,19 @@ CREATE TABLE IF NOT EXISTS user_preferences (
 );
 
 -- ======================================
+-- Tabela user_preferences_channels (associação user_preferences <-> channel)
+-- ======================================
+CREATE TABLE IF NOT EXISTS user_preferences_channels (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_preferences_id uuid NOT NULL,
+    channel_id uuid NOT NULL,
+    created_at timestamp NOT NULL DEFAULT now(),
+    CONSTRAINT fk_user_preferences_channels_user FOREIGN KEY (user_preferences_id) REFERENCES user_preferences(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_preferences_channels_channel FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
+    CONSTRAINT uq_user_channel UNIQUE (user_preferences_id, channel_id)
+);
+
+-- ======================================
 -- Tabela rules
 -- ======================================
 CREATE TABLE IF NOT EXISTS rules (
@@ -141,19 +154,6 @@ CREATE TABLE IF NOT EXISTS schedules (
     created_at timestamp NOT NULL DEFAULT now(),
     updated_at timestamp NOT NULL DEFAULT now(),
     CONSTRAINT fk_schedules_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- ======================================
--- Tabela schedules_channels (associação schedule <-> channel)
--- ======================================
-CREATE TABLE IF NOT EXISTS schedules_channels (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    schedule_id uuid NOT NULL,
-    channel_id uuid NOT NULL,
-    created_at timestamp NOT NULL DEFAULT now(),
-    CONSTRAINT fk_schedules_channels_schedule FOREIGN KEY (schedule_id) REFERENCES schedules(id) ON DELETE CASCADE,
-    CONSTRAINT fk_schedules_channels_channel FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
-    CONSTRAINT uq_schedule_channel UNIQUE (schedule_id, channel_id)
 );
 
 -- ======================================

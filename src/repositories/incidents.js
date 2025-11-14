@@ -5,7 +5,11 @@ export const IncidentsRepository = {
     findAll: async () => {
         const result = await pool.query(
             `
-            SELECT * FROM incidents
+            SELECT i.*, array_remove(array_agg(ir.role_id), NULL) AS roles 
+            FROM incidents i
+            LEFT JOIN incidents_roles ir 
+            ON i.id = ir.incident_id
+            GROUP BY i.id
             ORDER BY created_at DESC;
             `
         );
@@ -16,8 +20,12 @@ export const IncidentsRepository = {
     findById: async(id) => {
         const selectIdQuery =
         `
-        SELECT * FROM incidents
-        WHERE id = $1
+        SELECT i.*, array_remove(array_agg(ir.role_id), NULL) AS roles 
+        FROM incidents i
+        LEFT JOIN incidents_roles ir 
+        ON i.id = ir.incident_id
+        WHERE i.id = $1
+        GROUP BY i.id
         `;
 
         const result = await pool.query(selectIdQuery, [id]);
@@ -30,44 +38,57 @@ export const IncidentsRepository = {
     },
 
     create: async(incident) => {
-        const insertIncidentQuery =
-        `
-        INSERT INTO incidents
-        (assigned_user_id, rule_id, status, priority)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id;
-        `
+        const client = await pool.connect();
 
-        const values = [
-            incident.assignedUserId,
-            incident.ruleId,
-            incident.status,
-            incident.priority
-        ]
+        try{
+            await client.query('BEGIN');
 
-        const incidentDB = await pool.query(insertIncidentQuery, values);
+            const insertIncidentQuery =
+            `
+            INSERT INTO incidents
+            (assigned_user_id, rule_id, status, priority)
+            VALUES ($1, $2, $3, $4)
+            RETURNING id;
+            `
 
-        const insertRoleIncidentQuery = ` INSERT INTO incidents_roles (incident_id, role_id) VALUES ($1, $2); `;
+            const values = [
+                incident.assignedUserId,
+                incident.ruleId,
+                incident.status,
+                incident.priority
+            ]
 
-        for (const roleId of incident.roles) {
-            await pool.query(insertRoleIncidentQuery, [incidentDB.rows[0].id, roleId]);
+            const incidentDB = await client.query(insertIncidentQuery, values);
+
+            const insertRoleIncidentQuery = ` INSERT INTO incidents_roles (incident_id, role_id) VALUES ($1, $2); `;
+
+            for (const roleId of incident.roles) {
+                await client.query(insertRoleIncidentQuery, [incidentDB.rows[0].id, roleId]);
+            }
+
+            const incidentWithRolesQuery =
+            `
+            SELECT i.*, array_remove(array_agg(ir.role_id), NULL) AS roles
+            FROM incidents i
+            LEFT JOIN incidents_roles ir ON i.id = ir.incident_id
+            WHERE i.id = $1
+            GROUP BY i.id;
+            `;
+
+            const result = await client.query(incidentWithRolesQuery, [incidentDB.rows[0].id]);
+
+            await client.query('COMMIT');
+
+            return new Incidents(result.rows[0]);
+        } catch(error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
         }
-
-        const incidentWithRolesQuery =
-        `
-        SELECT i.*, array_agg(ir.role_id) AS roles
-        FROM incidents i
-        LEFT JOIN incidents_roles ir ON i.id = ir.incident_id
-        WHERE i.id = $1
-        GROUP BY i.id;
-        `;
-
-        const result = await pool.query(incidentWithRolesQuery, [incidentDB.rows[0].id]);
-
-        return new Incidents(result.rows[0]);
     },
 
-    update: async(incident) => {
+    update: async(incident, client) => {
         const updateIncidentQuery =
         `
         UPDATE incidents
@@ -90,7 +111,7 @@ export const IncidentsRepository = {
             incident.closedAt,
             incident.id
         ];
-        const result = await pool.query(updateIncidentQuery, values);
+        const result = await client.query(updateIncidentQuery, values);
 
         return new Incidents(result.rows[0]);
     }
@@ -110,7 +131,7 @@ export const IncidentsLogsRepository = {
         return IncidentsLogs.fromArray(result.rows);
     },
 
-    create: async(incidentsLogs) => {
+    create: async(incidentsLogs, client) => {
         const insertIncidentsLogsQuery =
         `
         INSERT INTO incidents_events
@@ -125,7 +146,7 @@ export const IncidentsLogsRepository = {
             incidentsLogs.comment,
             incidentsLogs.actionUserId
         ]
-        const result = await pool.query(insertIncidentsLogsQuery, values);
+        const result = await client.query(insertIncidentsLogsQuery, values);
 
         return new IncidentsLogs(result.rows[0]);
     }

@@ -36,13 +36,12 @@ export const SchedulesRepository = {
         `
         INSERT INTO schedules
         (user_id, start_time, end_time)
-        VALUES ($1, $2, $3, $4)
+        VALUES ($1, $2, $3)
         RETURNING *;
         `;
 
         const values = [
             schedule.userId,
-            schedule.channel,
             schedule.startTime,
             schedule.endTime
         ];

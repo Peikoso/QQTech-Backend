@@ -38,43 +38,58 @@ export const UsersRepository = {
         return new Users(result.rows[0]);
     },
 
-    create: async(userData) =>{
-        const insertUserQuery = 
-        `
-        INSERT INTO users
-        (name, matricula, email, profile, pending)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING id;
-        `;
-
-        const values = [
-            userData.name,
-            userData.matricula,
-            userData.email,
-            userData.profile,
-            userData.pending=false
-        ];
+    create: async(user) =>{
+        const client =  await pool.connect();
         
-        const userDB = await pool.query(insertUserQuery, values);
+        try{
+            await client.query('BEGIN');
 
-        const insertUserRoleQuery = `INSERT INTO users_roles (user_id, role_id) VALUES ($1, $2)`;
+            const insertUserQuery = 
+            `
+            INSERT INTO users
+            (name, matricula, email, profile, pending)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id;
+            `;
 
-        for (const roleId of userData.roles){
-            await pool.query(insertUserRoleQuery, [userDB.rows[0].id, roleId])
+            const values = [
+                user.name,
+                user.matricula,
+                user.email,
+                user.profile,
+                user.pending=false
+            ];
+            
+            const userDB = await client.query(insertUserQuery, values);
+
+            const insertUserRoleQuery = `INSERT INTO users_roles (user_id, role_id) VALUES ($1, $2)`;
+
+            for (const roleId of user.roles){
+                await client.query(insertUserRoleQuery, [userDB.rows[0].id, roleId])
+            }
+
+            const userWithRolesQuery =
+            `
+            SELECT u.*, array_remove(array_agg(ur.role_id), NULL) AS roles
+            FROM users u
+            LEFT JOIN users_roles ur
+            ON u.id = ur.user_id
+            WHERE u.id = $1
+            GROUP BY u.id;
+            `;
+
+            const result = await client.query(userWithRolesQuery, [userDB.rows[0].id]);
+
+            await client.query('COMMIT');
+            
+            return new Users(result.rows[0]);
+
+        } catch (error){
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
         }
 
-        const userWithRolesQuery =
-        `
-        SELECT u.*, array_remove(array_agg(ur.role_id), NULL) AS roles
-        FROM users u
-        LEFT JOIN users_roles ur
-        ON u.id = ur.user_id
-        WHERE u.id = $1
-        GROUP BY u.id;
-        `;
-
-        const result = await pool.query(userWithRolesQuery, [userDB.rows[0].id]);
-        
-        return new Users(result.rows[0]);
     }
 };

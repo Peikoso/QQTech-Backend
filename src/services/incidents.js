@@ -5,6 +5,7 @@ import { ValidationError, NotFoundError } from "../utils/errors.js";
 import { RoleService } from "./roles.js";
 import { RuleService } from "./rules.js";
 import { UserService } from "./users.js";
+import { pool } from "../config/database-conn.js";
 
 
 export const IncidentService = {
@@ -58,17 +59,32 @@ export const IncidentLogService = {
     },
 
     createIncidentsAction: async (dto) => {
-        const newIncidentsLogs = new IncidentsLogs(dto);
+        const client = await pool.connect();
 
-        await UserService.getUserById(newIncidentsLogs.actionUserId);
-        const incident = await IncidentService.getIncidentById(newIncidentsLogs.incidentId);
+        try {
+            await client.query('BEGIN');
 
-        newIncidentsLogs.nextStatus(incident.status);
-        const savedIncidentsLogs = await IncidentsLogsRepository.create(newIncidentsLogs);
+            const newIncidentsLogs = new IncidentsLogs(dto);
 
-        incident.updateStatus(savedIncidentsLogs);
-        await IncidentsRepository.update(incident);
+            await UserService.getUserById(newIncidentsLogs.actionUserId);
+            const incident = await IncidentService.getIncidentById(newIncidentsLogs.incidentId);
 
-        return savedIncidentsLogs;
+            newIncidentsLogs.nextStatus(incident.status);
+            const savedIncidentsLogs = await IncidentsLogsRepository.create(newIncidentsLogs, client);
+
+            incident.updateStatus(savedIncidentsLogs);
+            await IncidentsRepository.update(incident, client);
+
+            await client.query('COMMIT');
+
+            return savedIncidentsLogs;
+
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+
     }
 };

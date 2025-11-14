@@ -1,12 +1,27 @@
 import { Channels } from "../models/channels.js";
 import { ChannelsRepository } from "../repositories/channels.js";
-import { ForbiddenError } from "../utils/errors.js";
+import { ForbiddenError, NotFoundError } from "../utils/errors.js";
+import { isValidUuid } from "../utils/validations.js";
 
 export const ChannelService = {
     getAllChannels: async () => { 
         const channels = await ChannelsRepository.findAll();
 
         return Channels.fromArray(channels);
+    },
+
+    getChannelById: async (id) => {
+        if(!isValidUuid(id)) {
+            throw new NotFoundError("Invalid channel UUID.");
+        }
+
+        const channel = await ChannelsRepository.findById(id);
+        
+        if(!channel) {
+            throw new NotFoundError("Channel not found.");
+        }
+        
+        return channel;
     },
 
     createChannel: async (dto) => { 

@@ -13,6 +13,22 @@ export const ChannelsRepository = {
         return Channels.fromArray(response.rows);
     },
 
+    findById: async (id) => {
+        const selectIdQuery =
+        ` 
+        SELECT * FROM channels
+        WHERE id = $1
+        `;
+
+        const result = await pool.query(selectIdQuery, [id]);
+
+        if (!result.rows[0]) {
+            return null;
+        }
+
+        return new Channels(result.rows[0]);
+    },
+
     create: async (channel) => {
         const insertQuery = 
         `

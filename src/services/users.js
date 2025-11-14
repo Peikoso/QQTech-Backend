@@ -9,7 +9,8 @@ import { RoleService } from './roles.js';
 export const UserService = {
     getAllUsers: async () => {
         const users = await UsersRepository.findAll();
-        return ResponseUsersDto.fromArray(users);
+        
+        return users;
     },
 
     getUserById: async (id) => {
@@ -23,12 +24,10 @@ export const UserService = {
             throw new NotFoundError('User not found.')
         }
 
-        return new ResponseUsersDto(user);
+        return user;
     },
 
-    createUser: async (userData) => {
-        const dto = new CreateUsersDto(userData).validate();
-
+    createUser: async (dto) => {
         const newUser = new Users(dto);
 
         for(const roleId of newUser.roles){
@@ -37,6 +36,6 @@ export const UserService = {
 
         const savedUser = await UsersRepository.create(newUser);
 
-        return new ResponseUsersDto(savedUser);
+        return savedUser;
     }
 };

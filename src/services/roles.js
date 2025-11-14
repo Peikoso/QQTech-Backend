@@ -9,7 +9,8 @@ import { NotFoundError, ValidationError } from '../utils/errors.js';
 export const RoleService = {
     getAllRoles: async () => {
         const roles = await RolesRepository.findAll();
-        return ResponseRolesDto.fromArray(roles);
+        
+        return roles;
     },
 
     getRoleById: async (id) => {
@@ -23,16 +24,14 @@ export const RoleService = {
             throw new NotFoundError('Role not found.');
         }
 
-        return new ResponseRolesDto(role);
+        return role;
     },
 
-    createRole: async (roleData) => {
-        const dto = new CreateRolesDto(roleData).validate();
-        
+    createRole: async (dto) => {
         const newRole = new Roles(dto);
 
         const savedRole = await RolesRepository.create(newRole);
 
-        return new ResponseRolesDto(savedRole);
+        return savedRole;
     }
 };

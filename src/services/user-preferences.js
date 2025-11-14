@@ -11,7 +11,7 @@ export const UserPreferenceService = {
             throw new NotFoundError('User preference not found');
         }
         
-        return new UserPreferences(userPreference);
+        return userPreference;
     },
 
     createUserPreference: async (dto) => {

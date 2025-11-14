@@ -29,7 +29,7 @@ export const UserPreferenceService = {
         return savedUserPreference;
     },
 
-    updateUserPreferences: async (id, userPreference) => {
+    updateUserPreferences: async (id, dto) => {
         throw new ForbiddenError("Not implemented.");
     },
 

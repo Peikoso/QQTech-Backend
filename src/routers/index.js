@@ -9,6 +9,7 @@ import escalationPoliciesRouter from './escalation-policies.js';
 import runnersRouter from './runners.js';
 import sqlTestsRouter from './sql-test.js';
 import userPreferencesRouter from './user-preferences.js';
+import channelsRouter from './channels.js';
 
 const router = express.Router();
 
@@ -21,5 +22,6 @@ router.use('/escalation-policies', escalationPoliciesRouter);
 router.use('/runners', runnersRouter);
 router.use('/sql-tests', sqlTestsRouter);
 router.use('/user-preferences', userPreferencesRouter);
+router.use('/channels', channelsRouter);
 
 export default router;

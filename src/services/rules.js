@@ -41,7 +41,7 @@ export const RuleService = {
         return savedRule;
     },
 
-    updateRule: async (id, ruleData) => {
+    updateRule: async (id, dto) => {
         throw new ForbiddenError("Not implemented.");
     },
 

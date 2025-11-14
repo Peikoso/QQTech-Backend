@@ -34,7 +34,7 @@ export class CreateIncidentsLogsDto {
     }
 
     validate() {
-        if (typeof this.comment !== 'string' || this.comment.trim() === '') {
+        if (typeof this.comment !== 'string' || this.comment === '') {
             throw new ValidationError('Comment must be a non-empty string');
         }
         if(this.comment.length > 255){

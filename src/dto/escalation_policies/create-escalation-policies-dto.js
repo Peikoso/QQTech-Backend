@@ -11,7 +11,7 @@ export class CreateEscalationPolicy {
         if (isNaN(this.timeoutMs) || !Number.isInteger(this.timeoutMs)) {
             throw new ValidationError('Timeout must be a integer number.');
         }
-        if (!this.roleId || this.roleId.trim() === '') {
+        if (!this.roleId || this.roleId === '') {
             throw new ValidationError('roleId is required and must be a non-empty string.');
         }
         if (typeof this.isActive !== 'boolean') {

@@ -5,7 +5,7 @@ import { UserService} from "./users.js";
 
 export const UserPreferenceService = {
     getUserPreferences: async (id) => {
-        const userPreference = await UserPreferencesRepository.getById(id);
+        const userPreference = await UserPreferencesRepository.getByUserId(id);
 
         if (!userPreference) {
             throw new NotFoundError('User preference not found');

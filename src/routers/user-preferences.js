@@ -1,5 +1,5 @@
 import express from 'express';
-import { UserPreferencesController } from '../controllers/user-preferences';
+import { UserPreferencesController } from '../controllers/user-preferences.js';
 
 const router = express.Router();
 

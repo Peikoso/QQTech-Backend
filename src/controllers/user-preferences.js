@@ -1,5 +1,5 @@
-import { CreateUserPreferencesDto } from "../dto/user_preferences/create-user-preferences-dto";
-import { ResponseUserPreferencesDto } from "../dto/user_preferences/response-user-preferences-dto";
+import { CreateUserPreferencesDto } from "../dto/user_preferences/create-user-preferences-dto.js";
+import { ResponseUserPreferencesDto } from "../dto/user_preferences/response-user-preferences-dto.js";
 import { UserPreferenceService } from "../services/user-preferences.js";
 
 export const UserPreferencesController = {
@@ -27,7 +27,7 @@ export const UserPreferencesController = {
 
     updateUserPreferences: async (req, res) => {
         const id = req.params.id;
-        
+
         const preferencesData = req.body;
 
         const dto = new CreateUserPreferencesDto(preferencesData).validate();

@@ -1,5 +1,5 @@
 import express from 'express';
-import { SQLTestsController } from '../controllers/sql_test.js';
+import { SQLTestsController } from '../controllers/sql-test.js';
 
 const router = express.Router();
 

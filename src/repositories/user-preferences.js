@@ -1,10 +1,12 @@
+import { pool } from '../config/database-conn.js'
 import { UserPreferences } from "../models/user-preferences.js"
+
 
 export const UserPreferencesRepository = {
     getByUserId: async (id) => {
         const selectIdQuery = `SELECT * FROM user_preferences WHERE user_id = $1`;
         
-        const result = await db.query(selectIdQuery, [id]);
+        const result = await pool.query(selectIdQuery, [id]);
 
         if(!result){
             return null;
@@ -31,7 +33,7 @@ export const UserPreferencesRepository = {
             userPreferences.pushSoundEnabled
         ]
 
-        const result = await db.query(insertIdQuery, values);
+        const result = await pool.query(insertIdQuery, values);
 
         return new UserPreferences(result.rows[0]);
     },

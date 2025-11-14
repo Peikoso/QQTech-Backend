@@ -236,8 +236,8 @@ CREATE TABLE IF NOT EXISTS notifications (
     user_id uuid NOT NULL,
     title varchar(150) NOT NULL,
     message text NOT NULL,
-    created_at timestamp NOT NULL DEFAULT now(),
     duration_ms integer NOT NULL,
+    created_at timestamp NOT NULL DEFAULT now(),
     CONSTRAINT fk_notifications_incident FOREIGN KEY (incident_id) REFERENCES incidents(id) ON DELETE CASCADE,
     CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_notifications_channel FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE

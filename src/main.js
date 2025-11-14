@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-//app.use(AuthMiddleware);
+//app.use(AuthMiddleware);  // Desativado temporariamente para permitir acesso sem autenticação
 
 
 const PORT = process.env.PORT || 8000;

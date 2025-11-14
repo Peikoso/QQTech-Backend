@@ -48,6 +48,19 @@ CREATE TABLE IF NOT EXISTS user_preferences (
 );
 
 -- ======================================
+-- Tabela channels (canais de notificação)
+-- ======================================
+CREATE TABLE IF NOT EXISTS channels (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    type varchar(30) NOT NULL,       
+    name varchar(60) NOT NULL,
+    config jsonb,                      
+    is_active boolean NOT NULL DEFAULT true,
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp NOT NULL DEFAULT now()
+);
+
+-- ======================================
 -- Tabela user_preferences_channels (associação user_preferences <-> channel)
 -- ======================================
 CREATE TABLE IF NOT EXISTS user_preferences_channels (
@@ -128,19 +141,6 @@ CREATE TABLE IF NOT EXISTS incidents (
     CONSTRAINT fk_incidents_assigned_user FOREIGN KEY (assigned_user_id) REFERENCES users(id) ON DELETE SET NULL,
     CONSTRAINT chk_incidents_status CHECK (status IN ('OPEN','ACK','CLOSED')),
     CONSTRAINT chk_incidents_priority CHECK (priority IN ('LOW','MEDIUM','HIGH'))
-);
-
--- ======================================
--- Tabela channels (canais de notificação)
--- ======================================
-CREATE TABLE IF NOT EXISTS channels (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    type varchar(30) NOT NULL,       
-    name varchar(60) NOT NULL,
-    config jsonb,                      
-    is_active boolean NOT NULL DEFAULT true,
-    created_at timestamp NOT NULL DEFAULT now(),
-    updated_at timestamp NOT NULL DEFAULT now()
 );
 
 -- ======================================

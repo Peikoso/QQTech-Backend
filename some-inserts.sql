@@ -3,9 +3,9 @@
 -- ===============================
 INSERT INTO roles (name, color, description)
 VALUES
-('ADMIN', '#FF0000', 'Administrador do sistema'),
-('OPERATOR', '#00A8FF', 'Operador responsável por incidentes'),
-('VIEWER', '#AAAAAA', 'Usuário com permissões de leitura');
+('DEV', '#FF0000', 'Desenvolvedor'),
+('DBA', '#00A8FF', 'Administrador de banco de dados'),
+('INFRA', '#AAAAAA', 'Responsável pela infraestrutura de TI');
 
 -- ===============================
 -- USERS
@@ -33,15 +33,15 @@ SELECT id, true FROM users WHERE email='ronaldo@example.com';
 -- ===============================
 INSERT INTO users_roles (user_id, role_id)
 SELECT u.id, r.id FROM users u, roles r
-WHERE u.email = 'joao@example.com'  AND r.name = 'ADMIN';
+WHERE u.email = 'joao@example.com'  AND r.name = 'DEV';
 
 INSERT INTO users_roles (user_id, role_id)
 SELECT u.id, r.id FROM users u, roles r
-WHERE u.email = 'wanessa@example.com' AND r.name = 'OPERATOR';
+WHERE u.email = 'wanessa@example.com' AND r.name = 'DBA';
 
 INSERT INTO users_roles (user_id, role_id)
 SELECT u.id, r.id FROM users u, roles r
-WHERE u.email = 'ronaldo@example.com' AND r.name = 'VIEWER';
+WHERE u.email = 'ronaldo@example.com' AND r.name = 'INFRA';
 
 -- ===============================
 -- RULES
@@ -70,7 +70,7 @@ WHERE u.email='joao@example.com';
 -- RULES_ROLES
 -- ===============================
 INSERT INTO rules_roles (rule_id, role_id)
-SELECT r1.id, r2.id FROM rules r1, roles r2 WHERE r1.name='Regra de Teste' AND r2.name='OPERATOR';
+SELECT r1.id, r2.id FROM rules r1, roles r2 WHERE r1.name='Regra de Teste' AND r2.name='DBA';
 
 -- ===============================
 -- INCIDENTS
@@ -95,15 +95,6 @@ VALUES
 -- ===============================
 INSERT INTO schedules (user_id, start_time, end_time)
 SELECT id, now(), now() + INTERVAL '8 hours' FROM users WHERE email='wanessa@example.com';
-
--- ===============================
--- SCHEDULES_CHANNELS
--- ===============================
-INSERT INTO schedules_channels (schedule_id, channel_id)
-SELECT s.id, c.id
-FROM schedules s, channels c
-WHERE c.type='PUSH'
-LIMIT 1;
 
 -- ===============================
 -- INCIDENT EVENTS
@@ -135,7 +126,7 @@ SELECT id, 'SELECT 1;', 'OK' FROM users WHERE email='joao@example.com';
 -- ESCALATION POLICY
 -- ===============================
 INSERT INTO escalation_policy (timeout_ms, role_id)
-SELECT 300000, id FROM roles WHERE name='OPERATOR';
+SELECT 300000, id FROM roles WHERE name='DBA';
 
 -- ===============================
 -- APP SETTINGS
@@ -144,3 +135,87 @@ INSERT INTO app_settings (key, value)
 VALUES
 ('system.theme', '{"color":"dark"}'),
 ('notifications.retry_limit', '{"value":5}');
+
+-- ===============================
+-- USER PREFERENCES CHANNELS
+-- ===============================
+INSERT INTO user_preferences_channels (user_preferences_id, channel_id)
+SELECT up.id, c.id
+FROM user_preferences up, channels c
+WHERE c.type = 'PUSH'
+AND up.user_id = (SELECT id FROM users WHERE email='joao@example.com');
+
+INSERT INTO user_preferences_channels (user_preferences_id, channel_id)
+SELECT up.id, c.id
+FROM user_preferences up, channels c
+WHERE c.type = 'EMAIL'
+AND up.user_id = (SELECT id FROM users WHERE email='wanessa@example.com');
+
+INSERT INTO user_preferences_channels (user_preferences_id, channel_id)
+SELECT up.id, c.id
+FROM user_preferences up, channels c
+WHERE c.type = 'SMS'
+AND up.user_id = (SELECT id FROM users WHERE email='ronaldo@example.com');
+
+
+-- ===============================
+-- INCIDENTS_ROLES
+-- ===============================
+INSERT INTO incidents_roles (incident_id, role_id)
+SELECT i.id, r.id
+FROM incidents i, roles r
+WHERE r.name = 'DBA'
+LIMIT 1;
+
+
+-- ===============================
+-- RUNNERS (necessário antes de runner_logs)
+-- ===============================
+INSERT INTO runners (rule_id, status, last_run_at, next_run_at)
+SELECT id, 'active', now() - INTERVAL '1 hour', now() + INTERVAL '5 minutes'
+FROM rules
+WHERE name='Regra de Teste'
+LIMIT 1;
+
+
+-- ===============================
+-- RUNNER LOGS
+-- ===============================
+INSERT INTO runner_logs (runner_id, run_time_ms, result, error)
+SELECT id, 1200, 'OK', NULL
+FROM runners
+LIMIT 1;
+
+INSERT INTO runner_logs (runner_id, run_time_ms, result, error)
+SELECT id, 980, NULL, 'Timeout exceeded'
+FROM runners
+LIMIT 1;
+
+
+-- ===============================
+-- AUDIT LOGS
+-- ===============================
+INSERT INTO audit_logs (entity_id, entity_type, action_type, old_value, new_value, user_id)
+SELECT 
+    u.id,
+    'USER',
+    'UPDATE',
+    '{"pending": true}',
+    '{"pending": false}',
+    u.id
+FROM users u
+WHERE u.email='joao@example.com'
+LIMIT 1;
+
+INSERT INTO audit_logs (entity_id, entity_type, action_type, old_value, new_value, user_id)
+SELECT 
+    r.id,
+    'ROLE',
+    'INSERT',
+    NULL,
+    '{"name": "DBA"}',
+    (SELECT id FROM users WHERE email='joao@example.com')
+FROM roles r
+WHERE r.name='DBA'
+LIMIT 1;
+-- ===============================

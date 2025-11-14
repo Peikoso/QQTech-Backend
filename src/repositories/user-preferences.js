@@ -4,11 +4,19 @@ import { UserPreferences } from "../models/user-preferences.js"
 
 export const UserPreferencesRepository = {
     getByUserId: async (id) => {
-        const selectIdQuery = `SELECT * FROM user_preferences WHERE user_id = $1`;
+        const selectIdQuery = 
+        `
+        SELECT up.*, array_remove(array_agg(uc.channel_id), NULL) AS channels
+        FROM user_preferences up
+        LEFT JOIN user_preferences_channels uc 
+        ON up.id = uc.user_preferences_id
+        WHERE up.user_id = $1
+        GROUP BY up.id
+        `;
         
         const result = await pool.query(selectIdQuery, [id]);
 
-        if(!result){
+        if(!result.rows[0]){
             return null;
         }
 
@@ -16,26 +24,59 @@ export const UserPreferencesRepository = {
     },
 
     create: async (userPreferences) => {
-        const insertIdQuery = 
-        `INSERT INTO user_preferences 
-        (user_id, dnd_start_time, dnd_end_time, push_enabled, email_enabled, comuniq_enabled, push_sound_enabled) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW()) 
-        RETURNING *
-        `;
+        const client = await pool.connect();
 
-        const values = [
-            userPreferences.userId,
-            userPreferences.dndStartTime,
-            userPreferences.dndEndTime,
-            userPreferences.pushEnabled,
-            userPreferences.emailEnabled,
-            userPreferences.comuniqEnabled,
-            userPreferences.pushSoundEnabled
-        ]
+        try{
+            await client.query('BEGIN');
 
-        const result = await pool.query(insertIdQuery, values);
+            const insertIdQuery = 
+            `INSERT INTO user_preferences 
+            (user_id, dnd_start_time, dnd_end_time, push_enabled, push_sound_enabled) 
+            VALUES ($1, $2, $3, $4, $5) 
+            RETURNING *
+            `;
 
-        return new UserPreferences(result.rows[0]);
+            const values = [
+                userPreferences.userId,
+                userPreferences.dndStartTime,
+                userPreferences.dndEndTime,
+                userPreferences.pushEnabled,
+                userPreferences.pushSoundEnabled
+            ]
+
+            const userPreferencesDb = await client.query(insertIdQuery, values);
+
+            const insertUserPreferencesChannelsQuery =
+            `
+            INSERT INTO user_preferences_channels (user_preferences_id, channel_id) 
+            VALUES ($1, $2)
+            `;
+
+            for (const channelId of userPreferences.channels) {
+                await client.query(insertUserPreferencesChannelsQuery, [userPreferencesDb.rows[0].id, channelId]);
+            }
+
+            const selectUserPreferencesWithChannelsQuery =
+            `
+            SELECT up.*, array_remove(array_agg(uc.channel_id), NULL) AS channels
+            FROM user_preferences up
+            LEFT JOIN user_preferences_channels uc 
+            ON up.id = uc.user_preferences_id
+            WHERE up.id = $1
+            GROUP BY up.id
+            `
+            const userPreferencesWithChannels = await client.query(selectUserPreferencesWithChannelsQuery, [userPreferencesDb.rows[0].id]);
+
+            await client.query('COMMIT');
+
+            return new UserPreferences(userPreferencesWithChannels.rows[0]);
+
+        } catch(error){
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
     },
 
     update: async (id, userPreferences) => {

@@ -4,7 +4,7 @@ import { validateTimestampFormat } from '../../utils/validations.js';
 export class CreateSchedulesDto {
     constructor(schedule) {
         this.userId = schedule.userId?.trim();
-        this.channel = schedule.channel?.trim();
+        this.roles = Array.isArray(schedule.roles) ? [...new Set(schedule.roles)] : [];
         this.startTime = schedule.startTime?.trim();
         this.endTime = schedule.endTime?.trim();
     }
@@ -13,12 +13,8 @@ export class CreateSchedulesDto {
         if(!this.userId || this.userId.trim() === '') {
             throw new ValidationError('userId is required');
         }
-
-        if(!this.channel || this.channel.trim() === '') {
-            throw new ValidationError('channel is required');
-        }
-        if(this.channel.length > 30) {
-            throw new ValidationError('channel must not exceed 30 characters');
+        if(!Array.isArray(this.roles) || this.roles.length === 0 || !this.roles.every(role => typeof role === 'string')) {
+            throw new ValidationError('Roles must be a non-empty array of strings');
         }
         if(!validateTimestampFormat(this.startTime)) {
             throw new ValidationError('Start time must be in the format YYYY-MM-DDTHH:MM:SS.sssZ');

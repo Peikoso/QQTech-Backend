@@ -10,10 +10,6 @@ export class ResponseUsersDto {
         this.profile = user.profile;
         this.roles = user.roles;
         this.pending = user.pending;
-        this.pushEnabled = user.pushEnabled;
-        this.emailEnabled = user.emailEnabled;
-        this.comuniqEnabled = user.comuniqEnabled;
-        this.pushSoundEnabled = user.pushSoundEnabled;
     }
     
     static fromArray(usersArray) {

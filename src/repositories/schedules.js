@@ -35,7 +35,7 @@ export const SchedulesRepository = {
         const insertQuery = 
         `
         INSERT INTO schedules
-        (user_id, channel, start_time, end_time)
+        (user_id, start_time, end_time)
         VALUES ($1, $2, $3, $4)
         RETURNING *;
         `;

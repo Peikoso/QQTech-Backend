@@ -2,7 +2,7 @@ export class ResponseSchedulesDto {
     constructor(schedule) {
         this.id = schedule.id;
         this.userId = schedule.userId;
-        this.channel = schedule.channel;
+        this.channels = schedule.channels;
         this.startTime = schedule.startTime;
         this.endTime = schedule.endTime;
     }

@@ -100,7 +100,7 @@ export const IncidentsLogsRepository = {
     findByIncidentId: async (incidentId) => {
         const selectByIncidentIdQuery =
         `
-        SELECT * FROM incidents_logs
+        SELECT * FROM incidents_events
         WHERE incident_id = $1
         ORDER BY created_at DESC;
         `;
@@ -113,7 +113,7 @@ export const IncidentsLogsRepository = {
     create: async(incidentsLogs) => {
         const insertIncidentsLogsQuery =
         `
-        INSERT INTO incidents_logs
+        INSERT INTO incidents_events
         (incident_id, previous_status, current_status, comment, action_user_id)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING *;

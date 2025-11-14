@@ -12,10 +12,6 @@ export class Users {
         this.pending = user.pending;
         this.createdAt = user.created_at ?? user.createdAt;
         this.updatedAt = user.updated_at ?? user.updatedAt;
-        this.pushEnabled = user.push_enabled ?? user.pushEnabled;
-        this.emailEnabled = user.email_enabled ?? user.emailEnabled;
-        this.comuniqEnabled = user.comuniq_enabled ?? user.comuniqEnabled;
-        this.pushSoundEnabled = user.push_sound_enabled ?? user.pushSoundEnabled;
     }
 
     static fromArray(usersArray) {

@@ -1,7 +1,6 @@
 export class ResponseSQLTestDto {
     constructor(sqlTest){
         this.id = sqlTest.id;
-        this.ruleId = sqlTest.ruleId;
         this.userId = sqlTest.userId;
         this.sql = sqlTest.sql;
         this.result = sqlTest.result;

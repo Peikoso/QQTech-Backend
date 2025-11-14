@@ -4,6 +4,7 @@ import { ValidationError, NotFoundError } from '../utils/errors.js';
 import { isValidUuid } from '../utils/validations.js'
 import { UserService } from './users.js';
 import { RoleService } from './roles.js';
+import { ForbiddenError } from '../utils/errors.js';
 
 export const RuleService = {
     getAllRules: async () => {
@@ -41,10 +42,10 @@ export const RuleService = {
     },
 
     updateRule: async (id, ruleData) => {
-        //Logica a ser implementada
+        throw new ForbiddenError("Not implemented.");
     },
 
     deleteRule: async (id) => {
-        //Logica a ser implementada
+        throw new ForbiddenError("Not implemented.");
     }
 };

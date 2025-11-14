@@ -29,3 +29,11 @@ export class UnauthorizedError extends Error {
         this.status = 401; // Unauthorized
     }
 }
+
+export class ForbiddenError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'ForbiddenError';
+        this.status = 403; // Forbidden
+    }
+}

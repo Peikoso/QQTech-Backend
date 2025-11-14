@@ -27,11 +27,24 @@ CREATE TABLE IF NOT EXISTS users (
     profile varchar(30) NOT NULL, -- ex: admin, operator, viewer
     pending boolean NOT NULL DEFAULT true,
     created_at timestamp NOT NULL DEFAULT now(),
-    updated_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp NOT NULL DEFAULT now()
+);
+
+-- ======================================
+-- Tabela user_preferences
+-- ======================================
+CREATE TABLE IF NOT EXISTS user_preferences (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL,
+    dnd_start_time time,
+    dnd_end_time time,
     push_enabled boolean NOT NULL DEFAULT false,
     email_enabled boolean NOT NULL DEFAULT false,
     comuniq_enabled boolean NOT NULL DEFAULT false,
-    push_sound_enabled boolean NOT NULL DEFAULT false
+    push_sound_enabled boolean NOT NULL DEFAULT false,
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp NOT NULL DEFAULT now(),
+    CONSTRAINT fk_user_preferences_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- ======================================
@@ -105,23 +118,48 @@ CREATE TABLE IF NOT EXISTS incidents (
 );
 
 -- ======================================
--- Tabela schedule (escala/on-call)
+-- Tabela channels (canais de notificação)
+-- ======================================
+CREATE TABLE IF NOT EXISTS channels (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    type varchar(30) NOT NULL,       
+    name varchar(60) NOT NULL,
+    config jsonb,                      
+    is_active boolean NOT NULL DEFAULT true,
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp NOT NULL DEFAULT now()
+);
+
+-- ======================================
+-- Tabela schedules (escala/on-call)
 -- ======================================
 CREATE TABLE IF NOT EXISTS schedules (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL,
-    channel varchar(30) NOT NULL,
     start_time timestamp NOT NULL,
     end_time timestamp NOT NULL,
     created_at timestamp NOT NULL DEFAULT now(),
     updated_at timestamp NOT NULL DEFAULT now(),
-    CONSTRAINT fk_schedule_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_schedules_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- ======================================
--- Tabela incidents_logs (histórico)
+-- Tabela schedules_channels (associação schedule <-> channel)
 -- ======================================
-CREATE TABLE IF NOT EXISTS incidents_logs (
+CREATE TABLE IF NOT EXISTS schedules_channels (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    schedule_id uuid NOT NULL,
+    channel_id uuid NOT NULL,
+    created_at timestamp NOT NULL DEFAULT now(),
+    CONSTRAINT fk_schedules_channels_schedule FOREIGN KEY (schedule_id) REFERENCES schedules(id) ON DELETE CASCADE,
+    CONSTRAINT fk_schedules_channels_channel FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
+    CONSTRAINT uq_schedule_channel UNIQUE (schedule_id, channel_id)
+);
+
+-- ======================================
+-- Tabela incidents_events (histórico)
+-- ======================================
+CREATE TABLE IF NOT EXISTS incidents_events (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     incident_id uuid NOT NULL,
     previous_status varchar(10) NOT NULL,
@@ -174,51 +212,35 @@ CREATE TABLE IF NOT EXISTS runner_logs (
 );
 
 -- ======================================
--- Tabela rule_logs
+-- Tabela audit_logs
 -- ======================================
-CREATE TABLE IF NOT EXISTS rule_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    rule_id uuid NOT NULL,
-    user_id uuid,
+    entity_id uuid NOT NULL,
+    entity_type varchar(50) NOT NULL,
     action_type varchar(50) NOT NULL,
-    description varchar(255),
     old_value jsonb,
     new_value jsonb,
+    user_id uuid,
     created_at timestamp NOT NULL DEFAULT now(),
-    CONSTRAINT fk_rule_logs_rule FOREIGN KEY (rule_id) REFERENCES rules(id) ON DELETE CASCADE,
-    CONSTRAINT fk_rule_logs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    CONSTRAINT fk_audit_logs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- ======================================
--- Tabela notifications_logs
+-- Tabela notifications
 -- ======================================
-CREATE TABLE IF NOT EXISTS notifications_logs (
+CREATE TABLE IF NOT EXISTS notifications (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     incident_id uuid NOT NULL,
-    user_id uuid,
+    channel_id uuid,
+    user_id uuid NOT NULL,
     title varchar(150) NOT NULL,
     message text NOT NULL,
-    channel varchar(30) NOT NULL,
     created_at timestamp NOT NULL DEFAULT now(),
     duration_ms integer NOT NULL,
     CONSTRAINT fk_notifications_incident FOREIGN KEY (incident_id) REFERENCES incidents(id) ON DELETE CASCADE,
-    CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-);
-
--- ======================================
--- Tabela schedule_logs
--- ======================================
-CREATE TABLE IF NOT EXISTS schedule_logs (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    schedule_id uuid NOT NULL,
-    user_id uuid,
-    action_type varchar(50) NOT NULL,
-    description varchar(255),
-    old_value jsonb,
-    new_value jsonb,
-    created_at timestamp NOT NULL DEFAULT now(),
-    CONSTRAINT fk_schedule_logs_schedule FOREIGN KEY (schedule_id) REFERENCES schedule(id) ON DELETE CASCADE,
-    CONSTRAINT fk_schedule_logs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_notifications_channel FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE SET NULL
 );
 
 -- ======================================
@@ -226,12 +248,10 @@ CREATE TABLE IF NOT EXISTS schedule_logs (
 -- ======================================
 CREATE TABLE IF NOT EXISTS sql_test_logs (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    rule_id uuid NOT NULL,
     user_id uuid,
     sql text NOT NULL,
     result text,
     created_at timestamp NOT NULL DEFAULT now(),
-    CONSTRAINT fk_sql_test_logs_rule FOREIGN KEY (rule_id) REFERENCES rules(id) ON DELETE CASCADE,
     CONSTRAINT fk_sql_test_logs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
@@ -252,9 +272,10 @@ CREATE TABLE IF NOT EXISTS escalation_policy (
 -- Tabela app_settings
 -- ======================================
 CREATE TABLE IF NOT EXISTS app_settings (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    data jsonb NOT NULL,
-    updated_at timestamp NOT NULL DEFAULT now()
+    key TEXT PRIMARY KEY,
+    value jsonb NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
 -- ======================================
@@ -265,5 +286,9 @@ CREATE INDEX IF NOT EXISTS idx_incidents_rule_id ON incidents (rule_id);
 CREATE INDEX IF NOT EXISTS idx_incidents_assigned_user_id ON incidents (assigned_user_id);
 CREATE INDEX IF NOT EXISTS idx_incidents_status ON incidents (status);
 CREATE INDEX IF NOT EXISTS idx_runners_rule_id ON runners (rule_id);
-CREATE INDEX IF NOT EXISTS idx_notifications_incident_id ON notifications_logs (incident_id);
-CREATE INDEX IF NOT EXISTS idx_schedule_user_id ON schedule (user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_incident_id ON notifications (incident_id);
+CREATE INDEX IF NOT EXISTS idx_schedules_user_id ON schedules (user_id);
+CREATE INDEX IF NOT EXISTS idx_incidents_status_priority ON incidents(status, priority);
+CREATE INDEX IF NOT EXISTS idx_schedules_channels_channel_id ON schedules_channels (channel_id);
+CREATE INDEX IF NOT EXISTS idx_rules_roles_role_id ON rules_roles (role_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications (user_id);

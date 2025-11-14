@@ -7,6 +7,7 @@ import incidentsRouter from './incidents.js'
 import schedulesRouter from './schedules.js';
 import escalationPoliciesRouter from './escalation-policies.js';
 import runnersRouter from './runners.js';
+import sqlTestsRouter from './sql_test.js';
 
 const router = express.Router();
 
@@ -17,5 +18,6 @@ router.use('/incidents', incidentsRouter);
 router.use('/schedules', schedulesRouter);
 router.use('/escalation-policies', escalationPoliciesRouter);
 router.use('/runners', runnersRouter);
+router.use('/sql-tests', sqlTestsRouter);
 
 export default router;

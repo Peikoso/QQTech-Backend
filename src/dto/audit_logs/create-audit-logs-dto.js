@@ -1,6 +1,6 @@
 import { ValidationError } from "../../utils/errors.js";
 
-export class AuditLogs {
+export class CreateAuditLogsDto {
     constructor(auditLog){
         this.entityId = auditLog.entityId?.trim();
         this.entityType = auditLog.entityType?.trim();

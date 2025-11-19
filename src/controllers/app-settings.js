@@ -1,12 +1,10 @@
 import { AppSettingService } from '../services/app-settings.js';
-import { createAppSettingsDto } from '../dto/app_settings/create-app-settings-dto.js';
+import { CreateAppSettingsDto } from '../dto/app_settings/create-app-settings-dto.js';
 import { ResponseAppSettingsDto } from '../dto/app_settings/response-app-settings-dto.js';
 
 export const AppSettingsController = {
-    getAppSettingsByKey: async (req, res) => {
-        const key = req.params.key;
-
-        const appSettings = await AppSettingService.getAppSettingsByKey(key);
+    getAllAppSettings: async (req, res) => {
+        const appSettings = await AppSettingService.getAllAppSettings();
 
         const response = new ResponseAppSettingsDto(appSettings);
 
@@ -16,9 +14,9 @@ export const AppSettingsController = {
     createAppSettings: async (req, res) => {
         const appSettingsData = req.body;
 
-        const dto = new createAppSettingsDto(appSettingsData);
+        const dto = new CreateAppSettingsDto(appSettingsData);
 
-        const newAppSettings = await AppSettingService.createAppSettings(dto);
+        const newAppSettings = await AppSettingService.CreateAppSettingsDto(dto);
 
         const response = new ResponseAppSettingsDto(newAppSettings);
 

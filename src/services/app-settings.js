@@ -1,11 +1,21 @@
-import { ForbiddenError } from "../utils/errors";
+import { AppSettingsRepository } from "../repositories/app-settings.js";
+import { AppSettings } from "../models/app-settings.js";
+import { UserService } from "./users.js";
 
 export const AppSettingService = {
-    getAppSettingsByKey: async (key) => {
-        throw new ForbiddenError("Method not implemented");
+    getAllAppSettings: async () => {
+        const appSettings = AppSettingsRepository.findAll();
+
+        return appSettings
     },
 
     createAppSettings: async (dto) => {
-        throw new ForbiddenError("Method not implemented");
+        const appSettings = new AppSettings(dto).validateBusinessLogic();
+
+        await UserService.getUserById(appSettings.updatedByUserId);
+
+        const savedAppSettings = await AppSettingsRepository.create(appSettings);
+
+        return savedAppSettings;
     },
 };

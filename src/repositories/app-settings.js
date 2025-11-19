@@ -11,14 +11,15 @@ export const AppSettingsRepository = {
     create: async (appSettings) => {
         const insertQuery =
         `
-        INSERT INTO app_settings (key, value)
-        VALUES ($1, $2)
+        INSERT INTO app_settings (key, value, updated_by_user_id)
+        VALUES ($1, $2, $3)
         RETURNING *;
         `
 
         const values = [
             appSettings.key,
             appSettings.value,
+            appSettings.updatedByUserId
         ];
 
         const result = await pool.query(insertQuery, values);

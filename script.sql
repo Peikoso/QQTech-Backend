@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS rules (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name varchar(100) NOT NULL,
     description varchar(255) NOT NULL,
+    database_type varchar(50) NOT NULL,
     sql text NOT NULL,
     priority varchar(10) NOT NULL,
     execution_interval_ms integer NOT NULL,
@@ -94,8 +95,7 @@ CREATE TABLE IF NOT EXISTS rules (
     user_creator_id uuid,
     created_at timestamp NOT NULL DEFAULT now(),
     updated_at timestamp NOT NULL DEFAULT now(),
-    CONSTRAINT fk_rules_user_creator FOREIGN KEY (user_creator_id) REFERENCES users(id) ON DELETE SET NULL,
-    CONSTRAINT chk_rules_priority CHECK (priority IN ('LOW','MEDIUM','HIGH'))
+    CONSTRAINT fk_rules_user_creator FOREIGN KEY (user_creator_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- ======================================
@@ -130,17 +130,15 @@ CREATE TABLE IF NOT EXISTS users_roles (
 CREATE TABLE IF NOT EXISTS incidents (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     assigned_user_id uuid,
-    rule_id uuid NOT NULL,
+    rule_id uuid,
     status varchar(10) NOT NULL,
     priority varchar(10) NOT NULL,
     ack_at timestamp,
     closed_at timestamp,
     created_at timestamp NOT NULL DEFAULT now(),
     updated_at timestamp NOT NULL DEFAULT now(),
-    CONSTRAINT fk_incidents_rule FOREIGN KEY (rule_id) REFERENCES rules(id) ON DELETE CASCADE,
-    CONSTRAINT fk_incidents_assigned_user FOREIGN KEY (assigned_user_id) REFERENCES users(id) ON DELETE SET NULL,
-    CONSTRAINT chk_incidents_status CHECK (status IN ('OPEN','ACK','CLOSED')),
-    CONSTRAINT chk_incidents_priority CHECK (priority IN ('LOW','MEDIUM','HIGH'))
+    CONSTRAINT fk_incidents_rule FOREIGN KEY (rule_id) REFERENCES rules(id) ON DELETE SET NULL,
+    CONSTRAINT fk_incidents_assigned_user FOREIGN KEY (assigned_user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- ======================================
@@ -171,18 +169,6 @@ CREATE TABLE IF NOT EXISTS incidents_events (
     CONSTRAINT fk_incident_logs_user FOREIGN KEY (action_user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
--- ======================================
--- Tabela incidents_roles
--- ======================================
-CREATE TABLE IF NOT EXISTS incidents_roles (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    incident_id uuid NOT NULL,
-    role_id uuid NOT NULL,
-    created_at timestamp NOT NULL DEFAULT now(),
-    CONSTRAINT fk_incidents_roles_incident FOREIGN KEY (incident_id) REFERENCES incidents(id) ON DELETE CASCADE,
-    CONSTRAINT fk_incidents_roles_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
-    CONSTRAINT uq_incident_role UNIQUE (incident_id, role_id)
-);
 
 -- ======================================
 -- Tabela runners
@@ -199,16 +185,35 @@ CREATE TABLE IF NOT EXISTS runners (
 );
 
 -- ======================================
--- Tabela runner_logs
+-- Tabela runner_queue // NOVO 
+-- ======================================
+CREATE TABLE IF NOT EXISTS runner_queue (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    runner_id uuid NOT NULL,
+    status varchar(20) NOT NULL DEFAULT 'PENDING', -- PENDING, PROCESSING, COMPLETED, FAILED
+    scheduled_for timestamp NOT NULL, -- Quando deveria ter rodado (do runners)
+    queued_at timestamp NOT NULL DEFAULT now(),
+    started_at timestamp,
+    finished_at timestamp,
+    attempt_count integer DEFAULT 0, -- Para retentativas
+    CONSTRAINT fk_runner_queue_runner FOREIGN KEY (runner_id) REFERENCES runners(id) ON DELETE CASCADE
+);
+
+-- ======================================
+-- Tabela runner_logs // alterado ajeitar back
 -- ======================================
 CREATE TABLE IF NOT EXISTS runner_logs (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     runner_id uuid NOT NULL,
+    queue_id uuid, 
     run_time_ms integer NOT NULL,
+    execution_status varchar(20) NOT NULL, -- SUCCESS, TIMEOUT, ERROR
+    rows_affected bigint,
     result text,
     error text,
     executed_at timestamp NOT NULL DEFAULT now(),
-    CONSTRAINT fk_runner_logs_runner FOREIGN KEY (runner_id) REFERENCES runners(id) ON DELETE CASCADE
+    CONSTRAINT fk_runner_logs_runner FOREIGN KEY (runner_id) REFERENCES runners(id) ON DELETE CASCADE,
+    CONSTRAINT fk_runner_logs_queue FOREIGN KEY (queue_id) REFERENCES runner_queue(id) ON DELETE SET NULL
 );
 
 -- ======================================
@@ -227,7 +232,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 );
 
 -- ======================================
--- Tabela notifications
+-- Tabela notifications // alterado ajeitar back
 -- ======================================
 CREATE TABLE IF NOT EXISTS notifications (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -237,6 +242,10 @@ CREATE TABLE IF NOT EXISTS notifications (
     title varchar(150) NOT NULL,
     message text NOT NULL,
     duration_ms integer NOT NULL,
+    sent_at timestamp,
+    status varchar(20), -- QUEUED, SENT, DELIVERED, FAILED
+    read_at timestamp,
+    error text, 
     created_at timestamp NOT NULL DEFAULT now(),
     CONSTRAINT fk_notifications_incident FOREIGN KEY (incident_id) REFERENCES incidents(id) ON DELETE CASCADE,
     CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -284,7 +293,6 @@ CREATE TABLE IF NOT EXISTS app_settings (
 -- Índices adicionais
 -- ======================================
 CREATE INDEX IF NOT EXISTS idx_rules_user_creator_id ON rules (user_creator_id);
-CREATE INDEX IF NOT EXISTS idx_incidents_rule_id ON incidents (rule_id);
 CREATE INDEX IF NOT EXISTS idx_incidents_assigned_user_id ON incidents (assigned_user_id);
 CREATE INDEX IF NOT EXISTS idx_incidents_status ON incidents (status);
 CREATE INDEX IF NOT EXISTS idx_runners_rule_id ON runners (rule_id);
@@ -294,3 +302,4 @@ CREATE INDEX IF NOT EXISTS idx_incidents_status_priority ON incidents(status, pr
 CREATE INDEX IF NOT EXISTS idx_user_preferences_channels_channel_id ON user_preferences_channels (channel_id);
 CREATE INDEX IF NOT EXISTS idx_rules_roles_role_id ON rules_roles (role_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications (user_id);
+CREATE INDEX IF NOT EXISTS idx_runner_queue_status_scheduled  ON runner_queue (status, scheduled_for) WHERE status = 'PENDING';

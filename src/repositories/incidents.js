@@ -5,10 +5,25 @@ export const IncidentsRepository = {
     findAll: async () => {
         const result = await pool.query(
             `
-            SELECT i.*, array_remove(array_agg(ir.role_id), NULL) AS roles 
+            SELECT 
+                i.*,     
+                COALESCE(
+                    jsonb_agg(
+                        jsonb_build_object(
+                            'id', ro.id,
+                            'name', ro.name,
+                            'color', ro.color
+                        )
+                    ) FILTER (WHERE ro.id IS NOT NULL),
+                    '[]'::jsonb
+                ) AS roles
             FROM incidents i
-            LEFT JOIN incidents_roles ir 
-            ON i.id = ir.incident_id
+            LEFT JOIN rules r 
+            ON i.rule_id = r.id
+            LEFT JOIN rules_roles rr
+            ON r.id = rr.rule_id
+            LEFT JOIN roles ro
+            ON rr.role_id = ro.id
             GROUP BY i.id
             ORDER BY created_at DESC;
             `
@@ -20,12 +35,28 @@ export const IncidentsRepository = {
     findById: async(id) => {
         const selectIdQuery =
         `
-        SELECT i.*, array_remove(array_agg(ir.role_id), NULL) AS roles 
+        SELECT 
+            i.*,     
+            COALESCE(
+                jsonb_agg(
+                    jsonb_build_object(
+                        'id', ro.id,
+                        'name', ro.name,
+                        'color', ro.color
+                    )
+                ) FILTER (WHERE ro.id IS NOT NULL),
+                '[]'::jsonb
+            ) AS roles
         FROM incidents i
-        LEFT JOIN incidents_roles ir 
-        ON i.id = ir.incident_id
+        LEFT JOIN rules r 
+        ON i.rule_id = r.id
+        LEFT JOIN rules_roles rr
+        ON r.id = rr.rule_id
+        LEFT JOIN roles ro
+        ON rr.role_id = ro.id
         WHERE i.id = $1
         GROUP BY i.id
+        
         `;
 
         const result = await pool.query(selectIdQuery, [id]);
@@ -38,54 +69,25 @@ export const IncidentsRepository = {
     },
 
     create: async(incident) => {
-        const client = await pool.connect();
+        const insertIncidentQuery =
+        `
+        INSERT INTO incidents
+        (assigned_user_id, rule_id, status, priority)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *;
+        `
 
-        try{
-            await client.query('BEGIN');
+        const values = [
+            incident.assignedUserId,
+            incident.ruleId,
+            incident.status,
+            incident.priority
+        ]
 
-            const insertIncidentQuery =
-            `
-            INSERT INTO incidents
-            (assigned_user_id, rule_id, status, priority)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id;
-            `
+        const result = await pool.query(insertIncidentQuery, values);
 
-            const values = [
-                incident.assignedUserId,
-                incident.ruleId,
-                incident.status,
-                incident.priority
-            ]
+        return new Incidents(result.rows[0]);
 
-            const incidentDB = await client.query(insertIncidentQuery, values);
-
-            const insertRoleIncidentQuery = ` INSERT INTO incidents_roles (incident_id, role_id) VALUES ($1, $2); `;
-
-            for (const roleId of incident.roles) {
-                await client.query(insertRoleIncidentQuery, [incidentDB.rows[0].id, roleId]);
-            }
-
-            const incidentWithRolesQuery =
-            `
-            SELECT i.*, array_remove(array_agg(ir.role_id), NULL) AS roles
-            FROM incidents i
-            LEFT JOIN incidents_roles ir ON i.id = ir.incident_id
-            WHERE i.id = $1
-            GROUP BY i.id;
-            `;
-
-            const result = await client.query(incidentWithRolesQuery, [incidentDB.rows[0].id]);
-
-            await client.query('COMMIT');
-
-            return new Incidents(result.rows[0]);
-        } catch(error) {
-            await client.query('ROLLBACK');
-            throw error;
-        } finally {
-            client.release();
-        }
     },
 
     update: async(incident, client) => {

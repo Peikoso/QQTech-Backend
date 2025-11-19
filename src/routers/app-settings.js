@@ -3,7 +3,7 @@ import { AppSettingsController } from '../controllers/app-settings.js';
 
 const router = express.Router();
 
-router.get('/:key', AppSettingsController.getAllAppSettings);
+router.get('/', AppSettingsController.getAllAppSettings);
 router.post('/', AppSettingsController.createAppSettings);
 
 export default router;

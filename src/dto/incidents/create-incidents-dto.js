@@ -5,7 +5,6 @@ export class CreateIncidentsDto {
         this.assignedUserId = incident.assignedUserId?.trim();
         this.ruleId = incident.ruleId?.trim();
         this.priority = incident.priority?.trim();
-        this.roles = Array.isArray(incident.roles) ? [...new Set(incident.roles)] : [];
     }
 
     validate() {
@@ -17,9 +16,6 @@ export class CreateIncidentsDto {
         }
         if (!(this.priority === 'LOW' || this.priority === 'MEDIUM' || this.priority === 'HIGH')) {
             throw new ValidationError('Priority must be LOW, MEDIUM, or HIGH');
-        }
-        if(!Array.isArray(this.roles) || this.roles.length === 0 || !this.roles.every(role => typeof role === 'string')) {
-            throw new ValidationError('Roles must be a non-empty array of strings');
         }
 
         return this;

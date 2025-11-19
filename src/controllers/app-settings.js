@@ -6,7 +6,7 @@ export const AppSettingsController = {
     getAllAppSettings: async (req, res) => {
         const appSettings = await AppSettingService.getAllAppSettings();
 
-        const response = new ResponseAppSettingsDto(appSettings);
+        const response = ResponseAppSettingsDto.fromArray(appSettings);
 
         return res.status(200).json(response);
     },

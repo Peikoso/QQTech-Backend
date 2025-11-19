@@ -4,7 +4,7 @@ import { UserService } from "./users.js";
 
 export const AppSettingService = {
     getAllAppSettings: async () => {
-        const appSettings = AppSettingsRepository.findAll();
+        const appSettings = await AppSettingsRepository.findAll();
 
         return appSettings
     },

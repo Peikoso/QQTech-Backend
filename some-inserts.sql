@@ -23,17 +23,17 @@ VALUES
 -- ======================================
 -- USER PREFERENCES
 -- ======================================
-INSERT INTO user_preferences (user_id, dnd_start_time, dnd_end_time, push_enabled, email_enabled, comuniq_enabled, push_sound_enabled)
-SELECT id, '22:00', '07:00', true, true, false, true FROM users WHERE email='joao@example.com';
+INSERT INTO user_preferences (user_id, dnd_start_time, dnd_end_time)
+SELECT id, '22:00', '07:00' FROM users WHERE email='joao@example.com';
 
-INSERT INTO user_preferences (user_id, push_enabled, email_enabled)
-SELECT id, true, true FROM users WHERE email='wanessa@example.com';
+INSERT INTO user_preferences (user_id)
+SELECT id FROM users WHERE email='wanessa@example.com';
 
-INSERT INTO user_preferences (user_id, push_enabled)
-SELECT id, true FROM users WHERE email='ronaldo@example.com';
+INSERT INTO user_preferences (user_id)
+SELECT id FROM users WHERE email='ronaldo@example.com';
 
-INSERT INTO user_preferences (user_id, push_enabled, email_enabled, comuniq_enabled)
-SELECT id, true, false, true FROM users WHERE email='carlos@example.com';
+INSERT INTO user_preferences (user_id)
+SELECT id FROM users WHERE email='carlos@example.com';
 
 INSERT INTO user_preferences (user_id)
 SELECT id FROM users WHERE email='patricia@example.com';
@@ -61,10 +61,10 @@ SELECT u.id, r.id FROM users u, roles r WHERE u.email='patricia@example.com' AND
 -- ======================================
 INSERT INTO channels (type, name, config)
 VALUES
-('PUSH', 'Firebase Cloud Messaging', '{"provider":"fcm"}'),
-('EMAIL', 'SMTP Server', '{"provider":"smtp"}'),
-('SMS', 'Twilio SMS', '{"provider":"twilio"}'),
-('WEBHOOK', 'Webhook Delivery', '{"provider":"webhook"}');
+('PUSH', 'Push Notification', '{"provider":"firebase"}'),
+('PUSH_SOUND', 'Push Notification with Sound', '{"provider":"firebase","sound":true}'),
+('EMAIL', 'Email SMTP', '{"provider":"smtp"}'),
+('COMUNIQ', 'Comuniq Internal Messaging', '{"provider":"comuniq"}');
 
 -- ======================================
 -- USER_PREFERENCES_CHANNELS
@@ -85,7 +85,7 @@ AND c.type='EMAIL';
 INSERT INTO user_preferences_channels (user_preferences_id, channel_id)
 SELECT up.id, c.id FROM user_preferences up, channels c
 WHERE up.user_id=(SELECT id FROM users WHERE email='ronaldo@example.com')
-AND c.type='SMS';
+AND c.type='COMUNIQ';
 
 -- ======================================
 -- RULES

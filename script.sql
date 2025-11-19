@@ -38,10 +38,6 @@ CREATE TABLE IF NOT EXISTS user_preferences (
     user_id uuid NOT NULL,
     dnd_start_time time,
     dnd_end_time time,
-    push_enabled boolean NOT NULL DEFAULT false,
-    email_enabled boolean NOT NULL DEFAULT false,
-    comuniq_enabled boolean NOT NULL DEFAULT false,
-    push_sound_enabled boolean NOT NULL DEFAULT false,
     created_at timestamp NOT NULL DEFAULT now(),
     updated_at timestamp NOT NULL DEFAULT now(),
     CONSTRAINT fk_user_preferences_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

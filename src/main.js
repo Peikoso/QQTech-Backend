@@ -5,13 +5,14 @@ import process from 'process';
 import routes from './routers/index.js';
 import { AuthMiddleware } from './middleware/auth-middleware.js';
 import { ErrorMiddleware } from './middleware/error-middleware.js';
+import { ValidateBodyMiddleware } from './middleware/validate-body-middleware.js';
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
 //app.use(AuthMiddleware);  // Desativado temporariamente para permitir acesso sem autenticação
-
+app.use(ValidateBodyMiddleware)
 
 const PORT = process.env.PORT || 8000;
 

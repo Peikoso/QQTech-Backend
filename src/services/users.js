@@ -1,6 +1,4 @@
 import { UsersRepository } from '../repositories/users.js';
-import { ResponseUsersDto } from '../dto/users/response-users-dto.js';
-import { CreateUsersDto } from '../dto/users/create-users-dto.js';
 import { Users } from '../models/users.js';
 import { ValidationError, NotFoundError } from '../utils/errors.js';
 import { isValidUuid } from '../utils/validations.js';

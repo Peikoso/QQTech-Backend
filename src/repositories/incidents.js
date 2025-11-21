@@ -28,6 +28,15 @@ export const IncidentsRepository = {
             ($1::varchar IS NULL OR i.status = $1)
             AND ($2::uuid IS NULL OR i.rule_id = $2)
             AND ($3::varchar IS NULL OR i.priority = $3)
+            AND (
+            $6::uuid[] IS NULL
+            OR EXISTS (
+                SELECT 1
+                FROM rules_roles rr2
+                WHERE rr2.rule_id = i.rule_id
+                AND rr2.role_id = ANY($6::uuid[])
+            )
+        )
         GROUP BY i.id
         ORDER BY i.created_at DESC
         LIMIT $4 OFFSET $5;

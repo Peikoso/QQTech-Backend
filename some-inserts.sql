@@ -198,8 +198,8 @@ OFFSET 1 LIMIT 1;
 -- ======================================
 -- NOTIFICATIONS
 -- ======================================
-INSERT INTO notifications (incident_id, channel_id, user_id, title, message, duration_ms)
-SELECT i.id, c.id, u.id, 'Novo Incidente', 'Há um incidente aberto.', 4000
+INSERT INTO notifications (incident_id, channel_id, user_id, title, message, status, sent_at)
+SELECT i.id, c.id, u.id, 'Novo Incidente', 'Há um incidente aberto.', 'SENT', now()
 FROM incidents i, channels c, users u
 WHERE c.type='PUSH' AND u.email='wanessa@example.com'
 LIMIT 1;
